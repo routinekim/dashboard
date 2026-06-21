@@ -1,5 +1,61 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import AskAI from './AskAI'
+
+const DASHBOARD_URL = 'https://dashboard-two-kappa-86.vercel.app/'
+
+function QRModal({ onClose }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 2000,
+        background: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(135deg, #0f172a, #1e1b4b)',
+          border: '1px solid rgba(167,139,250,0.3)',
+          borderRadius: 28,
+          padding: '48px 56px',
+          textAlign: 'center',
+          boxShadow: '0 0 80px rgba(124,58,237,0.4)',
+        }}
+      >
+        <div style={{ color: '#a78bfa', fontSize: 12, letterSpacing: 3, marginBottom: 20, textTransform: 'uppercase' }}>
+          Live Dashboard
+        </div>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block', marginBottom: 24 }}>
+          <QRCodeSVG value={DASHBOARD_URL} size={280} fgColor="#0f172a" bgColor="#ffffff" level="H" />
+        </div>
+        <div style={{ color: '#e2e8f0', fontSize: 18, fontWeight: 800, marginBottom: 8 }}>
+          한세대학교 AX 경쟁력 분석
+        </div>
+        <div style={{
+          color: '#7c3aed', fontSize: 13, fontFamily: 'monospace',
+          background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)',
+          borderRadius: 10, padding: '8px 20px', marginBottom: 24,
+        }}>
+          {DASHBOARD_URL}
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+            color: '#94a3b8', padding: '8px 24px', borderRadius: 20,
+            cursor: 'pointer', fontSize: 13, fontFamily: 'inherit',
+          }}
+        >
+          닫기 (ESC)
+        </button>
+      </div>
+    </div>
+  )
+}
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, Legend,
@@ -315,6 +371,13 @@ function AnalysisPanel({ metric, hansei, data, onClose }) {
 
 export default function HanseiDashboard({ data }) {
   const [activeMetric, setActiveMetric] = useState(null)
+  const [qrOpen, setQrOpen] = useState(false)
+
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') { setQrOpen(false); setActiveMetric(null) } }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const hansei = useMemo(() => data.find(d => d.학교명 === '한세대학교'), [data])
 
@@ -370,7 +433,26 @@ export default function HanseiDashboard({ data }) {
         border: '1px solid rgba(239,68,68,0.3)',
         borderRadius: 20, padding: '36px 40px', marginBottom: 32,
         display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap',
+        position: 'relative',
       }}>
+        {/* QR 버튼 — 우측 상단 */}
+        <button
+          onClick={() => setQrOpen(true)}
+          title="QR 코드로 공유"
+          style={{
+            position: 'absolute', top: 16, right: 16,
+            background: 'rgba(124,58,237,0.15)',
+            border: '1px solid rgba(167,139,250,0.35)',
+            borderRadius: 12, padding: '8px 14px',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.3)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,58,237,0.15)'}
+        >
+          <QRCodeSVG value={DASHBOARD_URL} size={28} fgColor="#a78bfa" bgColor="transparent" level="L" />
+          <span style={{ color: '#a78bfa', fontSize: 12, fontWeight: 700 }}>QR 공유</span>
+        </button>
         <div style={{ flex: 1, minWidth: 280 }}>
           <div style={{ color: '#fca5a5', fontSize: 13, letterSpacing: 3, marginBottom: 8 }}>
             한세대학교 전용 대시보드
@@ -530,6 +612,9 @@ export default function HanseiDashboard({ data }) {
 
       {/* AI 분석 어시스턴트 (인라인) */}
       <AskAI hansei={hansei} />
+
+      {/* QR 모달 */}
+      {qrOpen && <QRModal onClose={() => setQrOpen(false)} />}
     </div>
   )
 }

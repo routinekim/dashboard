@@ -75,22 +75,22 @@ const QUICK = ['취업률이 왜 높아요?', '가장 시급한 개선 과제는
 
 const mdComponents = {
   h1: ({ children }) => (
-    <div style={{ color: '#a78bfa', fontSize: 16, fontWeight: 800, marginBottom: 8, marginTop: 12, paddingBottom: 6, borderBottom: '1px solid rgba(167,139,250,0.2)' }}>{children}</div>
+    <div style={{ color: '#a78bfa', fontSize: 20, fontWeight: 800, marginBottom: 10, marginTop: 14, paddingBottom: 8, borderBottom: '1px solid rgba(167,139,250,0.2)' }}>{children}</div>
   ),
   h2: ({ children }) => (
-    <div style={{ color: '#a78bfa', fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 12 }}>{children}</div>
+    <div style={{ color: '#a78bfa', fontSize: 18, fontWeight: 700, marginBottom: 8, marginTop: 14 }}>{children}</div>
   ),
   h3: ({ children }) => (
-    <div style={{ color: '#93c5fd', fontSize: 13, fontWeight: 700, marginBottom: 4, marginTop: 10 }}>{children}</div>
+    <div style={{ color: '#93c5fd', fontSize: 16, fontWeight: 700, marginBottom: 6, marginTop: 12 }}>{children}</div>
   ),
   p: ({ children }) => (
-    <p style={{ color: '#e2e8f0', fontSize: 13, lineHeight: 1.8, margin: '4px 0 8px' }}>{children}</p>
+    <p style={{ color: '#e2e8f0', fontSize: 14, lineHeight: 1.85, margin: '4px 0 8px' }}>{children}</p>
   ),
   strong: ({ children }) => (
-    <strong style={{ color: '#fde68a', fontWeight: 700 }}>{children}</strong>
+    <strong style={{ color: '#fde68a', fontWeight: 700, fontSize: '1.05em' }}>{children}</strong>
   ),
   em: ({ children }) => (
-    <em style={{ color: '#86efac', fontStyle: 'normal', fontWeight: 600 }}>{children}</em>
+    <em style={{ color: '#86efac', fontStyle: 'normal', fontWeight: 600, fontSize: '1.05em' }}>{children}</em>
   ),
   ul: ({ children }) => (
     <ul style={{ listStyle: 'none', margin: '6px 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>{children}</ul>
@@ -99,7 +99,7 @@ const mdComponents = {
     <ol style={{ listStyle: 'none', margin: '6px 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 5, counterReset: 'li' }}>{children}</ol>
   ),
   li: ({ children, ordered }) => (
-    <li style={{ display: 'flex', gap: 8, color: '#cbd5e1', fontSize: 13, lineHeight: 1.7 }}>
+    <li style={{ display: 'flex', gap: 8, color: '#cbd5e1', fontSize: 14, lineHeight: 1.75 }}>
       <span style={{ color: '#7c3aed', flexShrink: 0, marginTop: 2 }}>{ordered ? '•' : '▸'}</span>
       <span>{children}</span>
     </li>

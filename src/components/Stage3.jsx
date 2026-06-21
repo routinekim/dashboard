@@ -401,7 +401,7 @@ function AIChat() {
           body: JSON.stringify({
             system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
             contents: history,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 1500 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 3000 },
           }),
         }
       );

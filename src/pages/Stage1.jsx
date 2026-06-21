@@ -108,6 +108,11 @@ export default function Stage1() {
     )
   }, [xMetric, yMetric, sizeMetric])
 
+  const szExtent = useMemo(() => {
+    const vals = validData.map(d => d[sizeMetric] || 1)
+    return [Math.min(...vals), Math.max(...vals)]
+  }, [validData, sizeMetric])
+
   const groupedData = useMemo(() => {
     const groups = {}
     validData.forEach(d => {
@@ -310,7 +315,7 @@ export default function Stage1() {
               tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
               axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
             />
-            <ZAxis dataKey="sz" range={[40, 600]} />
+            <ZAxis dataKey="sz" range={[50, 50]} />
             <Tooltip content={<CustomTooltip />} />
             {Object.entries(groupedData).map(([type, data]) => (
               <Scatter
@@ -318,21 +323,36 @@ export default function Stage1() {
                 name={type}
                 data={data}
                 fill={TYPE_COLORS[type] || '#888'}
-                fillOpacity={0.7}
+                fillOpacity={0.8}
                 shape={(props) => {
-                  const { cx, cy, r, payload } = props
+                  const { cx, cy, payload } = props
                   const isHansei = payload.name === '한세대학교'
+
+                  // ZAxis r prop이 불안정하므로 직접 계산
+                  const [minSz, maxSz] = szExtent
+                  const sz = payload.sz || 1
+                  const t = maxSz > minSz ? (sz - minSz) / (maxSz - minSz) : 0.5
+                  const r = 5 + Math.sqrt(t) * 16  // 5~21px 범위
+
                   if (isHansei) {
                     return (
                       <g>
-                        <circle cx={cx} cy={cy} r={r * 1.5} fill="rgba(255,68,68,0.1)" style={{ animation: 'pulseStar 2s ease-in-out infinite' }} />
-                        <circle cx={cx} cy={cy} r={r} fill="#ff4444" stroke="#fff" strokeWidth={2} fillOpacity={0.9} />
-                        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize={r * 0.8} fontWeight="bold">★</text>
-                        <text x={cx + r + 4} y={cy} textAnchor="start" dominantBaseline="middle" fill="#ff4444" fontSize={11} fontWeight="700">한세대</text>
+                        <circle cx={cx} cy={cy} r={r * 2} fill="rgba(255,68,68,0.12)" style={{ animation: 'pulseStar 2s ease-in-out infinite' }} />
+                        <circle cx={cx} cy={cy} r={r} fill="#ff4444" stroke="#fff" strokeWidth={2} fillOpacity={0.95} />
+                        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize={Math.max(10, r * 0.85)} fontWeight="bold">★</text>
+                        <text x={cx + r + 5} y={cy} textAnchor="start" dominantBaseline="middle" fill="#ff4444" fontSize={11} fontWeight="700">한세대</text>
                       </g>
                     )
                   }
-                  return <circle cx={cx} cy={cy} r={r} fill={TYPE_COLORS[type] || '#888'} fillOpacity={0.65} stroke="rgba(255,255,255,0.1)" strokeWidth={0.5} />
+                  return (
+                    <circle
+                      cx={cx} cy={cy} r={r}
+                      fill={TYPE_COLORS[type] || '#888'}
+                      fillOpacity={0.75}
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth={0.5}
+                    />
+                  )
                 }}
               />
             ))}

@@ -125,7 +125,11 @@
 
 - **앱 수정·완료 시 https://github.com/routinekim/dashboard 에 자동 푸시** (`.env` 제외)
   
-  - 항상 **`main`** 브랜치에 push — 로컬 브랜치명과 무관하게 `git push origin HEAD:main`으로 고정
+  - 항상 **`main`** 브랜치에 push — 로컬 브랜치명과 무관하게 아래 명령어로 고정:
+    ```
+    git fetch origin && git rebase origin/main && git push origin HEAD:main
+    ```
+  - 원격에 기존 커밋이 있어 충돌이 발생해도 위 순서대로 실행하면 자동 해결됨
 
 ---
 

@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const COMPARISON_DATA = {
   안양대학교: { 취업률: 64.1, 신입생경쟁률: 11.7, 신입생충원율: 100.4, 교원확보율_정원: 61.21, 전임교원강의비율: 66.9, 학생1인당장학금: 4024950, 학생1인당교육비: 13092200, 기숙사수용율: 6.8, 재학생수: 4353, 평균등록금: 8261400 },
@@ -70,6 +72,63 @@ ${compRows}
 }
 
 const QUICK = ['취업률이 왜 높아요?', '가장 시급한 개선 과제는?', '전임교원강의비율 문제는?', '경쟁 대학과의 차이점은?']
+
+const mdComponents = {
+  h1: ({ children }) => (
+    <div style={{ color: '#a78bfa', fontSize: 16, fontWeight: 800, marginBottom: 8, marginTop: 12, paddingBottom: 6, borderBottom: '1px solid rgba(167,139,250,0.2)' }}>{children}</div>
+  ),
+  h2: ({ children }) => (
+    <div style={{ color: '#a78bfa', fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 12 }}>{children}</div>
+  ),
+  h3: ({ children }) => (
+    <div style={{ color: '#93c5fd', fontSize: 13, fontWeight: 700, marginBottom: 4, marginTop: 10 }}>{children}</div>
+  ),
+  p: ({ children }) => (
+    <p style={{ color: '#e2e8f0', fontSize: 13, lineHeight: 1.8, margin: '4px 0 8px' }}>{children}</p>
+  ),
+  strong: ({ children }) => (
+    <strong style={{ color: '#fde68a', fontWeight: 700 }}>{children}</strong>
+  ),
+  em: ({ children }) => (
+    <em style={{ color: '#86efac', fontStyle: 'normal', fontWeight: 600 }}>{children}</em>
+  ),
+  ul: ({ children }) => (
+    <ul style={{ listStyle: 'none', margin: '6px 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol style={{ listStyle: 'none', margin: '6px 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 5, counterReset: 'li' }}>{children}</ol>
+  ),
+  li: ({ children, ordered }) => (
+    <li style={{ display: 'flex', gap: 8, color: '#cbd5e1', fontSize: 13, lineHeight: 1.7 }}>
+      <span style={{ color: '#7c3aed', flexShrink: 0, marginTop: 2 }}>{ordered ? '•' : '▸'}</span>
+      <span>{children}</span>
+    </li>
+  ),
+  hr: () => (
+    <div style={{ borderTop: '1px solid rgba(124,58,237,0.25)', margin: '12px 0' }} />
+  ),
+  code: ({ inline, children }) => inline ? (
+    <code style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', padding: '1px 6px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' }}>{children}</code>
+  ) : (
+    <pre style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: '10px 14px', margin: '8px 0', overflowX: 'auto' }}>
+      <code style={{ color: '#a5f3fc', fontSize: 12, fontFamily: 'monospace' }}>{children}</code>
+    </pre>
+  ),
+  table: ({ children }) => (
+    <div style={{ overflowX: 'auto', margin: '10px 0' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>{children}</table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th style={{ background: 'rgba(124,58,237,0.25)', color: '#c4b5fd', padding: '6px 10px', textAlign: 'left', fontWeight: 700, borderBottom: '1px solid rgba(124,58,237,0.3)' }}>{children}</th>
+  ),
+  td: ({ children }) => (
+    <td style={{ color: '#cbd5e1', padding: '6px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{children}</td>
+  ),
+  blockquote: ({ children }) => (
+    <div style={{ borderLeft: '3px solid #7c3aed', paddingLeft: 12, margin: '8px 0', color: '#94a3b8', fontStyle: 'italic' }}>{children}</div>
+  ),
+}
 
 export default function AskAI({ hansei }) {
   const [messages, setMessages] = useState([
@@ -174,20 +233,26 @@ export default function AskAI({ hansei }) {
             justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
           }}>
             <div style={{
-              maxWidth: '80%',
+              maxWidth: m.role === 'user' ? '75%' : '100%',
               padding: '10px 14px',
-              borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+              borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '12px',
               background: m.role === 'user'
                 ? 'linear-gradient(135deg, #7c3aed, #4f46e5)'
                 : m.role === 'error'
-                ? 'rgba(239,68,68,0.15)'
-                : 'rgba(255,255,255,0.06)',
-              border: m.role !== 'user' ? '1px solid rgba(255,255,255,0.08)' : 'none',
-              color: m.role === 'error' ? '#fca5a5' : '#e2e8f0',
-              fontSize: 13, lineHeight: 1.75,
-              whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                ? 'rgba(239,68,68,0.12)'
+                : 'rgba(255,255,255,0.04)',
+              border: m.role !== 'user' ? `1px solid ${m.role === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}` : 'none',
+              wordBreak: 'break-word',
             }}>
-              {m.text}
+              {m.role === 'user' ? (
+                <span style={{ color: '#f1f5f9', fontSize: 13, lineHeight: 1.7 }}>{m.text}</span>
+              ) : m.role === 'error' ? (
+                <span style={{ color: '#fca5a5', fontSize: 13 }}>{m.text}</span>
+              ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                  {m.text}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}

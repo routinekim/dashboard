@@ -69,11 +69,13 @@ ${compRows}
 질문에 데이터 수치가 필요하면 위 표를 참고하여 정확히 인용하세요.`
 }
 
-export default function AskAI({ hansei, isOpen, onToggle }) {
+const QUICK = ['취업률이 왜 높아요?', '가장 시급한 개선 과제는?', '전임교원강의비율 문제는?', '경쟁 대학과의 차이점은?']
+
+export default function AskAI({ hansei }) {
   const [messages, setMessages] = useState([
     {
       role: 'model',
-      text: '안녕하세요! 한세대학교 데이터와 분석 보고서에 대해 무엇이든 질문해 주세요.\n\n예: "취업률이 왜 높아요?", "가장 시급한 개선 과제는?", "경쟁 대학과 어떻게 달라요?"',
+      text: '안녕하세요! 한세대학교 데이터와 분석 보고서에 대해 무엇이든 질문해 주세요.\n\n아래 버튼을 누르거나 직접 입력하세요.',
     },
   ])
   const [input, setInput] = useState('')
@@ -88,10 +90,6 @@ export default function AskAI({ hansei, isOpen, onToggle }) {
     }
   }, [messages])
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) inputRef.current.focus()
-  }, [isOpen])
-
   function getSession() {
     if (sessionRef.current) return sessionRef.current
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
@@ -105,180 +103,143 @@ export default function AskAI({ hansei, isOpen, onToggle }) {
     return sessionRef.current
   }
 
-  async function send() {
-    const text = input.trim()
-    if (!text || loading) return
-
+  async function send(text) {
+    const msg = (text ?? input).trim()
+    if (!msg || loading) return
     setInput('')
-    setMessages(prev => [...prev, { role: 'user', text }])
+    setMessages(prev => [...prev, { role: 'user', text: msg }])
     setLoading(true)
-
     try {
       const chat = getSession()
-      const result = await chat.sendMessage(text)
-      const reply = result.response.text()
-      setMessages(prev => [...prev, { role: 'model', text: reply }])
+      const result = await chat.sendMessage(msg)
+      setMessages(prev => [...prev, { role: 'model', text: result.response.text() }])
     } catch (e) {
-      setMessages(prev => [...prev, {
-        role: 'error',
-        text: `오류가 발생했습니다: ${e.message}`,
-      }])
+      setMessages(prev => [...prev, { role: 'error', text: `오류: ${e.message}` }])
     } finally {
       setLoading(false)
     }
   }
 
-  const QUICK = ['취업률이 왜 높아요?', '가장 시급한 개선 과제는?', '전임교원강의비율 문제가 심각한가요?', '비교 대학과의 차이점은?']
-
   return (
-    <>
-      {/* 플로팅 토글 버튼 */}
-      <button
-        onClick={onToggle}
-        style={{
-          position: 'fixed', bottom: 32, right: 32, zIndex: 900,
-          width: 60, height: 60, borderRadius: '50%',
-          background: isOpen
-            ? 'rgba(124,58,237,0.8)'
-            : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-          border: '2px solid rgba(167,139,250,0.5)',
-          color: '#fff', fontSize: 26, cursor: 'pointer',
-          boxShadow: '0 8px 32px rgba(124,58,237,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.25s',
-        }}
-        title="AI에게 질문하기"
-      >
-        {isOpen ? '✕' : '✨'}
-      </button>
+    <div style={{
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(124,58,237,0.25)',
+      borderRadius: 16,
+      overflow: 'hidden',
+      marginTop: 24,
+    }}>
+      {/* 헤더 */}
+      <div style={{
+        padding: '16px 20px',
+        background: 'rgba(124,58,237,0.12)',
+        borderBottom: '1px solid rgba(124,58,237,0.2)',
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <span style={{ fontSize: 22 }}>✨</span>
+        <div>
+          <div style={{ color: '#e2e8f0', fontWeight: 700, fontSize: 15 }}>AI 분석 어시스턴트</div>
+          <div style={{ color: '#7c3aed', fontSize: 11 }}>Gemini 2.5 Flash · 한세대 데이터 학습</div>
+        </div>
+      </div>
 
-      {/* 채팅 패널 */}
-      {isOpen && (
+      {/* 빠른 질문 버튼 */}
+      {messages.length <= 1 && (
         <div style={{
-          position: 'fixed', bottom: 104, right: 32, zIndex: 900,
-          width: 400, height: 560,
-          background: 'linear-gradient(160deg, #0f172a, #1e1b4b)',
-          border: '1px solid rgba(124,58,237,0.4)',
-          borderRadius: 20, overflow: 'hidden',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.15)',
-          display: 'flex', flexDirection: 'column',
+          padding: '12px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          display: 'flex', gap: 8, flexWrap: 'wrap',
         }}>
-          {/* 헤더 */}
-          <div style={{
-            padding: '16px 20px',
-            background: 'rgba(124,58,237,0.15)',
-            borderBottom: '1px solid rgba(124,58,237,0.2)',
-            display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 20 }}>✨</span>
-            <div>
-              <div style={{ color: '#e2e8f0', fontWeight: 700, fontSize: 14 }}>AI 분석 어시스턴트</div>
-              <div style={{ color: '#7c3aed', fontSize: 11 }}>Gemini 2.0 Flash · 한세대 데이터 학습</div>
-            </div>
-          </div>
-
-          {/* 메시지 목록 */}
-          <div ref={chatRef} style={{
-            flex: 1, overflowY: 'auto', padding: '16px',
-            display: 'flex', flexDirection: 'column', gap: 12,
-          }}>
-            {messages.map((m, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
-              }}>
-                <div style={{
-                  maxWidth: '85%',
-                  padding: '10px 14px',
-                  borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.role === 'user'
-                    ? 'linear-gradient(135deg, #7c3aed, #4f46e5)'
-                    : m.role === 'error'
-                    ? 'rgba(239,68,68,0.15)'
-                    : 'rgba(255,255,255,0.06)',
-                  border: m.role === 'model' ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                  color: m.role === 'error' ? '#fca5a5' : '#e2e8f0',
-                  fontSize: 13, lineHeight: 1.7,
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                }}>
-                  {m.text}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div style={{ display: 'flex', gap: 6, padding: '8px 14px', alignItems: 'center' }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} style={{
-                    width: 7, height: 7, borderRadius: '50%',
-                    background: '#7c3aed',
-                    animation: `bounce 1s ease-in-out ${i * 0.15}s infinite`,
-                  }} />
-                ))}
-                <style>{`@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }`}</style>
-              </div>
-            )}
-          </div>
-
-          {/* 빠른 질문 */}
-          {messages.length <= 1 && (
-            <div style={{
-              padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.05)',
-              display: 'flex', gap: 6, flexWrap: 'wrap', flexShrink: 0,
+          {QUICK.map(q => (
+            <button key={q} onClick={() => send(q)} style={{
+              background: 'rgba(124,58,237,0.12)',
+              border: '1px solid rgba(124,58,237,0.3)',
+              color: '#a78bfa', fontSize: 12, padding: '6px 14px',
+              borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
+              transition: 'all 0.15s',
             }}>
-              {QUICK.map(q => (
-                <button key={q} onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 0) }} style={{
-                  background: 'rgba(124,58,237,0.12)',
-                  border: '1px solid rgba(124,58,237,0.3)',
-                  color: '#a78bfa', fontSize: 11, padding: '4px 10px',
-                  borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
-                  whiteSpace: 'nowrap', transition: 'all 0.15s',
-                }}>
-                  {q}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* 입력창 */}
-          <div style={{
-            padding: '12px 16px',
-            borderTop: '1px solid rgba(124,58,237,0.2)',
-            display: 'flex', gap: 8, flexShrink: 0,
-          }}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-              placeholder="데이터나 보고서에 대해 질문하세요..."
-              disabled={loading}
-              style={{
-                flex: 1, padding: '10px 14px',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(124,58,237,0.3)',
-                borderRadius: 12, color: '#e2e8f0', fontSize: 13,
-                fontFamily: 'inherit', outline: 'none',
-              }}
-            />
-            <button
-              onClick={send}
-              disabled={loading || !input.trim()}
-              style={{
-                width: 40, height: 40, borderRadius: 12,
-                background: loading || !input.trim()
-                  ? 'rgba(124,58,237,0.2)'
-                  : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                border: 'none', color: '#fff', fontSize: 18,
-                cursor: loading || !input.trim() ? 'default' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s', flexShrink: 0,
-              }}
-            >
-              ↑
+              {q}
             </button>
-          </div>
+          ))}
         </div>
       )}
-    </>
+
+      {/* 메시지 목록 */}
+      <div ref={chatRef} style={{
+        height: 340, overflowY: 'auto', padding: '16px',
+        display: 'flex', flexDirection: 'column', gap: 12,
+      }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
+          }}>
+            <div style={{
+              maxWidth: '80%',
+              padding: '10px 14px',
+              borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+              background: m.role === 'user'
+                ? 'linear-gradient(135deg, #7c3aed, #4f46e5)'
+                : m.role === 'error'
+                ? 'rgba(239,68,68,0.15)'
+                : 'rgba(255,255,255,0.06)',
+              border: m.role !== 'user' ? '1px solid rgba(255,255,255,0.08)' : 'none',
+              color: m.role === 'error' ? '#fca5a5' : '#e2e8f0',
+              fontSize: 13, lineHeight: 1.75,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+            }}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div style={{ display: 'flex', gap: 6, padding: '8px 4px', alignItems: 'center' }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                width: 7, height: 7, borderRadius: '50%', background: '#7c3aed',
+                animation: `bounce 1s ease-in-out ${i * 0.15}s infinite`,
+              }} />
+            ))}
+            <style>{`@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}`}</style>
+          </div>
+        )}
+      </div>
+
+      {/* 입력창 */}
+      <div style={{
+        padding: '12px 16px',
+        borderTop: '1px solid rgba(124,58,237,0.2)',
+        display: 'flex', gap: 8,
+      }}>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
+          placeholder="데이터나 보고서에 대해 질문하세요..."
+          disabled={loading}
+          style={{
+            flex: 1, padding: '10px 14px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(124,58,237,0.3)',
+            borderRadius: 12, color: '#e2e8f0', fontSize: 13,
+            fontFamily: 'inherit', outline: 'none',
+          }}
+        />
+        <button
+          onClick={() => send()}
+          disabled={loading || !input.trim()}
+          style={{
+            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+            background: loading || !input.trim()
+              ? 'rgba(124,58,237,0.2)'
+              : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+            border: 'none', color: '#fff', fontSize: 20,
+            cursor: loading || !input.trim() ? 'default' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
+          }}
+        >↑</button>
+      </div>
+    </div>
   )
 }

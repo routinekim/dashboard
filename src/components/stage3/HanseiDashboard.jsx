@@ -315,7 +315,6 @@ function AnalysisPanel({ metric, hansei, data, onClose }) {
 
 export default function HanseiDashboard({ data }) {
   const [activeMetric, setActiveMetric] = useState(null)
-  const [aiOpen, setAiOpen] = useState(false)
 
   const hansei = useMemo(() => data.find(d => d.학교명 === '한세대학교'), [data])
 
@@ -529,8 +528,8 @@ export default function HanseiDashboard({ data }) {
         />
       )}
 
-      {/* AI 어시스턴트 */}
-      <AskAI hansei={hansei} isOpen={aiOpen} onToggle={() => setAiOpen(o => !o)} />
+      {/* AI 분석 어시스턴트 (인라인) */}
+      <AskAI hansei={hansei} />
     </div>
   )
 }

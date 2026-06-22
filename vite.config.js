@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      __GEMINI_KEY__: JSON.stringify(env.GEMINI_API_KEY || '')
+      __GEMINI_KEY__: JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || '')
     }
   }
 })

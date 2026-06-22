@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      __GEMINI_KEY__: JSON.stringify(env.GEMINI_API_KEY || '')
     }
   }
 })

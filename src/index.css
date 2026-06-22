@@ -1,0 +1,30 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #060E1F;
+  --cyan: #00d4ff;
+  --blue: #0044cc;
+  --red: #ff4444;
+  --orange: #ff8800;
+  --green: #39ff14;
+  --grid: rgba(0, 100, 200, 0.045);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+  color: #e0f0ff;
+  overflow-x: hidden;
+}
+
+* { -webkit-font-smoothing: antialiased; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a1628; }
+::-webkit-scrollbar-thumb { background: #00d4ff44; border-radius: 3px; }
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+select { font-family: inherit; }

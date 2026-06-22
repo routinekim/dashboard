@@ -1,476 +1,404 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import {
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend
 } from 'recharts'
-import universitiesData from '../../universities_data.json'
-import hanseiReportData from '../../hansei_report_data.json'
+import universitiesData from '@data/universities_data.json'
 
+// ── 지표 정의 ──────────────────────────────────────────────────────────────
 const AXIS_METRICS = [
-  { key: 'employmentRate', label: '취업률', unit: '%' },
-  { key: 'competitionRate', label: '신입생 경쟁률', unit: ':1' },
-  { key: 'fillRate', label: '신입생 충원율', unit: '%' },
-  { key: 'facultyRateByQuota', label: '교원확보율(정원)', unit: '%' },
+  { key: 'employmentRate',        label: '취업률',            unit: '%' },
+  { key: 'competitionRate',       label: '신입생 경쟁률',     unit: ':1' },
+  { key: 'fillRate',              label: '신입생 충원율',     unit: '%' },
+  { key: 'facultyRateByQuota',    label: '교원확보율(정원)',  unit: '%' },
   { key: 'facultyRateByEnrolled', label: '교원확보율(재학)', unit: '%' },
-  { key: 'studentsPerFaculty', label: '교원1인당 학생수', unit: '명' },
-  { key: 'scholarshipPerStudent', label: '1인당 장학금', unit: '원', divisor: 10000 },
-  { key: 'educationCostPerStudent', label: '1인당 교육비', unit: '만원' },
-  { key: 'dormitoryRate', label: '기숙사 수용률', unit: '%' },
-  { key: 'fullTimeLectureRatio', label: '전임교원 강의비율', unit: '%' },
+  { key: 'studentsPerFaculty',    label: '교원1인당 학생수',  unit: '명' },
+  { key: 'scholarshipPerStudent', label: '1인당 장학금',      unit: '원' },
+  { key: 'educationCostPerStudent',label:'1인당 교육비',      unit: '만원' },
+  { key: 'dormitoryRate',         label: '기숙사 수용률',     unit: '%' },
+  { key: 'fullTimeLectureRatio',  label: '전임교원 강의비율', unit: '%' },
 ]
 
 const SIZE_METRICS = [
-  { key: 'enrolled', label: '재학생 수' },
-  { key: 'admissionQuota', label: '입학정원' },
-  { key: 'graduates', label: '졸업생 수' },
+  { key: 'enrolled',       label: '재학생 수',  unit: '명' },
+  { key: 'admissionQuota', label: '입학정원',   unit: '명' },
+  { key: 'graduates',      label: '졸업생 수',  unit: '명' },
 ]
-
-const TYPE_COLORS = {
-  '사립': '#8b5cf6',
-  '국립': '#06b6d4',
-  '특별법국립': '#f59e0b',
-  '특별법법인': '#10b981',
-  '국립대법인': '#3b82f6',
-  '공립': '#f97316',
-}
 
 const RADAR_METRICS = [
-  { key: 'employmentRate', label: '취업률', unit: '%', max: 100 },
-  { key: 'facultyRateByQuota', label: '교원확보율', unit: '%', max: 150 },
-  { key: 'educationCostPerStudent', label: '1인당교육비', unit: '만원', max: 30000 },
-  { key: 'scholarshipPerStudent', label: '장학금', unit: '만원', max: 6000000 },
-  { key: 'dormitoryRate', label: '기숙사수용률', unit: '%', max: 100 },
-  { key: 'competitionRate', label: '경쟁률', unit: ':1', max: 20 },
+  { key: 'employmentRate',         label: '취업률',     max: 100 },
+  { key: 'facultyRateByQuota',     label: '교원확보율', max: 100 },
+  { key: 'educationCostPerStudent',label: '교육비',     max: 25000 },
+  { key: 'scholarshipPerStudent',  label: '장학금',     max: 7000000 },
+  { key: 'dormitoryRate',          label: '기숙사',     max: 100 },
+  { key: 'competitionRate',        label: '경쟁률',     max: 20 },
 ]
 
-const RADAR_COLORS = ['#00d4ff', '#8b5cf6', '#ff6b6b', '#ffd93d', '#6bcb77', '#ff8c42']
+const COMPETITORS = ['안양대학교', '성결대학교', '협성대학교', '평택대학교', '한신대학교']
 
-const STYLES = `
-  @keyframes pulseStar {
-    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px #ff4444; }
-    50% { transform: scale(1.4); opacity: 0.8; box-shadow: 0 0 24px #ff4444, 0 0 48px #ff444488; }
-  }
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-`
-
-function getValue(d, metric) {
-  const m = AXIS_METRICS.find(a => a.key === metric)
-  if (!m) return d[metric] || 0
-  const raw = d[metric] || 0
-  if (m.divisor) return raw / m.divisor
-  return raw
+// 설립유형별 색상
+const TYPE_COLORS = {
+  '국립':     '#4da6ff',
+  '사립':     '#00d4ff',
+  '특별법국립': '#bf8fff',
+  '특별법':   '#bf8fff',
 }
 
-function formatValue(val, metricKey) {
-  const m = AXIS_METRICS.find(a => a.key === metricKey)
-  if (!m) return val
-  if (m.divisor) return `${(val / 1).toFixed(0)}만원`
-  return `${val}${m.unit}`
+const formatVal = (v, unit) => {
+  if (unit === '원') return (v / 10000).toFixed(0) + '만원'
+  if (unit === '만원') return v.toFixed(0) + '만원'
+  return v + unit
 }
 
-function CustomBubbleDot(props) {
-  const { cx, cy, payload, xMetric, yMetric } = props
-  const isHansei = payload.name === '한세대학교'
+// ── 커스텀 버블 Shape ─────────────────────────────────────────────────────
+function BubbleShape({ cx, cy, payload, szExtent }) {
+  if (!cx || !cy || isNaN(cx) || isNaN(cy)) return null
+  const [minSz, maxSz] = szExtent
+  const t = maxSz > minSz ? (payload.sz - minSz) / (maxSz - minSz) : 0.5
+  const r = 5 + Math.sqrt(t) * 16
 
-  if (isHansei) {
+  if (payload.isHansei) {
+    const pts = Array.from({ length: 5 }, (_, i) => {
+      const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2
+      const ri = i % 2 === 0 ? r * 1.4 : r * 0.6
+      return `${cx + ri * Math.cos(angle)},${cy + ri * Math.sin(angle)}`
+    }).join(' ')
     return (
       <g>
-        <circle cx={cx} cy={cy} r={16} fill="rgba(255,68,68,0.15)" style={{ animation: 'pulseStar 2s ease-in-out infinite' }} />
-        <circle cx={cx} cy={cy} r={8} fill="#ff4444" stroke="#fff" strokeWidth={2} />
-        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize="10" fontWeight="bold">★</text>
+        <circle cx={cx} cy={cy} r={r * 2.2} fill="rgba(255,50,50,0)" stroke="#ff3333" strokeWidth={1.5} opacity={0.5}>
+          <animate attributeName="r" values={`${r * 1.8};${r * 3};${r * 1.8}`} dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite" />
+        </circle>
+        <polygon points={pts} fill="#ff3333" stroke="#ff6666" strokeWidth={1} />
       </g>
     )
   }
 
-  return null
+  const color = TYPE_COLORS[payload.estabType] || '#00d4ff'
+  return (
+    <circle
+      cx={cx} cy={cy} r={r}
+      fill={color} fillOpacity={0.55}
+      stroke={color} strokeWidth={1} strokeOpacity={0.8}
+    />
+  )
 }
 
-export default function Stage1() {
-  const [xMetric, setXMetric] = useState('employmentRate')
-  const [yMetric, setYMetric] = useState('competitionRate')
-  const [sizeMetric, setSizeMetric] = useState('enrolled')
-  const [hoveredUniv, setHoveredUniv] = useState(null)
-  const [radarSelected, setRadarSelected] = useState(['한세대학교', '안양대학교', '성결대학교', '협성대학교', '평택대학교', '한신대학교'])
-
-  const validData = useMemo(() => {
-    return universitiesData.filter(d =>
-      d[xMetric] != null && d[yMetric] != null && d[sizeMetric] != null &&
-      d[xMetric] > 0 && d[yMetric] > 0
-    )
-  }, [xMetric, yMetric, sizeMetric])
-
-  const szExtent = useMemo(() => {
-    const vals = validData.map(d => d[sizeMetric] || 1)
-    return [Math.min(...vals), Math.max(...vals)]
-  }, [validData, sizeMetric])
-
-  const groupedData = useMemo(() => {
-    const groups = {}
-    validData.forEach(d => {
-      const type = d.estabType || '기타'
-      if (!groups[type]) groups[type] = []
-      const xVal = getValue(d, xMetric)
-      const yVal = getValue(d, yMetric)
-      const sz = d[sizeMetric] || 100
-      groups[type].push({ ...d, xVal, yVal, sz })
-    })
-    return groups
-  }, [validData, xMetric, yMetric, sizeMetric])
-
-  const xLabel = AXIS_METRICS.find(m => m.key === xMetric)?.label || ''
-  const yLabel = AXIS_METRICS.find(m => m.key === yMetric)?.label || ''
-
-  const radarAllUnivs = useMemo(() => {
-    const competitorNames = hanseiReportData.competitors.map(c => c.name)
-    const allNames = ['한세대학교', ...competitorNames]
-    return allNames
-  }, [])
-
-  const radarData = useMemo(() => {
-    const getUniData = (name) => {
-      if (name === '한세대학교') return hanseiReportData.hansei
-      return hanseiReportData.competitors.find(c => c.name === name) || null
-    }
-
-    return RADAR_METRICS.map(metric => {
-      const obj = { metric: metric.label }
-      radarSelected.forEach(name => {
-        const uni = getUniData(name)
-        if (!uni) { obj[name] = 0; return }
-        const raw = uni[metric.key] || 0
-        const val = metric.key === 'scholarshipPerStudent' ? raw / 10000 : raw
-        obj[name] = Math.round((val / (metric.key === 'scholarshipPerStudent' ? metric.max / 10000 : metric.max)) * 100)
-      })
-      return obj
-    })
-  }, [radarSelected])
-
-  const CustomTooltip = useCallback(({ active, payload }) => {
-    if (!active || !payload || !payload.length) return null
-    const d = payload[0]?.payload
-    if (!d) return null
-    const xM = AXIS_METRICS.find(m => m.key === xMetric)
-    const yM = AXIS_METRICS.find(m => m.key === yMetric)
-    const szM = SIZE_METRICS.find(m => m.key === sizeMetric)
-    const isHansei = d.name === '한세대학교'
-
-    return (
-      <div style={{
-        background: isHansei ? 'rgba(255,68,68,0.15)' : 'rgba(10,10,26,0.95)',
-        border: `1px solid ${isHansei ? '#ff4444' : 'rgba(139,92,246,0.4)'}`,
-        borderRadius: '12px', padding: '14px 18px',
-        backdropFilter: 'blur(20px)',
-        boxShadow: isHansei ? '0 8px 32px rgba(255,68,68,0.2)' : '0 8px 32px rgba(0,0,0,0.4)',
-        minWidth: '200px',
-      }}>
-        <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '8px', color: isHansei ? '#ff4444' : '#fff' }}>
-          {isHansei ? '★ ' : ''}{d.name}
-        </div>
-        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '8px' }}>
-          {d.region} · {d.estabType}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{ fontSize: '12px', color: '#a78bfa' }}>
-            {xM?.label}: <span style={{ color: '#fff' }}>{d.xVal?.toFixed(1)}{xM?.unit}</span>
-          </div>
-          <div style={{ fontSize: '12px', color: '#06b6d4' }}>
-            {yM?.label}: <span style={{ color: '#fff' }}>{d.yVal?.toFixed(1)}{yM?.unit}</span>
-          </div>
-          <div style={{ fontSize: '12px', color: '#10b981' }}>
-            {szM?.label}: <span style={{ color: '#fff' }}>{d[sizeMetric]?.toLocaleString()}명</span>
-          </div>
-        </div>
+// ── 커스텀 툴팁 ───────────────────────────────────────────────────────────
+function CustomTooltip({ active, payload, xKey, yKey, szKey }) {
+  if (!active || !payload?.length) return null
+  const d = payload[0]?.payload
+  if (!d) return null
+  const xMeta = AXIS_METRICS.find(m => m.key === xKey)
+  const yMeta = AXIS_METRICS.find(m => m.key === yKey)
+  const szMeta = SIZE_METRICS.find(m => m.key === szKey)
+  return (
+    <div style={{
+      background: 'rgba(6,14,31,0.95)', border: '1px solid #00d4ff44',
+      borderRadius: 8, padding: '10px 14px', minWidth: 180,
+      boxShadow: '0 4px 20px rgba(0,212,255,0.2)', fontSize: 12
+    }}>
+      <div style={{ color: d.isHansei ? '#ff3333' : '#00d4ff', fontWeight: 700, marginBottom: 6, fontSize: 14 }}>
+        {d.isHansei ? '⭐ ' : ''}{d.name}
       </div>
-    )
-  }, [xMetric, yMetric, sizeMetric])
+      <div style={{ color: '#a0c4e8', lineHeight: 1.8 }}>
+        <div>{xMeta?.label}: <span style={{ color: '#fff' }}>{formatVal(d.x, xMeta?.unit)}</span></div>
+        <div>{yMeta?.label}: <span style={{ color: '#fff' }}>{formatVal(d.y, yMeta?.unit)}</span></div>
+        <div>{szMeta?.label}: <span style={{ color: '#fff' }}>{d.sz?.toLocaleString()}명</span></div>
+        <div>지역: <span style={{ color: '#fff' }}>{d.region}</span></div>
+        <div>설립: <span style={{ color: TYPE_COLORS[d.estabType] || '#ccc' }}>{d.estabType}</span></div>
+      </div>
+    </div>
+  )
+}
 
-  const selectStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(139,92,246,0.3)',
-    borderRadius: '8px',
-    color: '#fff',
-    padding: '8px 12px',
-    fontSize: '13px',
-    cursor: 'pointer',
-    outline: 'none',
-    minWidth: '160px',
-  }
+// ── 레이더 커스텀 툴팁 ────────────────────────────────────────────────────
+function RadarTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{
+      background: 'rgba(6,14,31,0.95)', border: '1px solid #00d4ff44',
+      borderRadius: 8, padding: '8px 12px', fontSize: 12
+    }}>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: p.color, marginBottom: 2 }}>
+          {p.name}: <strong>{p.value.toFixed(1)}점</strong>
+        </div>
+      ))}
+    </div>
+  )
+}
 
-  const labelStyle = {
-    fontSize: '11px',
-    color: 'rgba(255,255,255,0.5)',
-    marginBottom: '4px',
-    letterSpacing: '0.5px',
-  }
+// ── 메인 Stage1 ───────────────────────────────────────────────────────────
+export default function Stage1() {
+  const [xKey, setXKey] = useState('employmentRate')
+  const [yKey, setYKey] = useState('competitionRate')
+  const [szKey, setSzKey] = useState('enrolled')
+  const [competitor, setCompetitor] = useState('안양대학교')
+
+  // 버블 데이터 준비
+  const { points, szExtent } = useMemo(() => {
+    const raw = universitiesData
+      .filter(u => u.campus === '본교')
+      .filter(u => u[xKey] > 0 && u[yKey] > 0 && u[szKey] > 0)
+      .map(u => ({
+        x: u[xKey],
+        y: u[yKey],
+        sz: u[szKey],
+        name: u.name,
+        region: u.region,
+        estabType: u.estabType,
+        isHansei: u.name === '한세대학교',
+      }))
+
+    const szVals = raw.map(d => d.sz)
+    return {
+      points: raw,
+      szExtent: [Math.min(...szVals), Math.max(...szVals)]
+    }
+  }, [xKey, yKey, szKey])
+
+  // 레이더 데이터 준비 (정규화 0~100)
+  const radarData = useMemo(() => {
+    const hansei = universitiesData.find(u => u.name === '한세대학교' && u.campus === '본교')
+    const comp = universitiesData.find(u => u.name === competitor && u.campus === '본교')
+    if (!hansei || !comp) return []
+
+    return RADAR_METRICS.map(m => ({
+      metric: m.label,
+      한세대: parseFloat(((hansei[m.key] / m.max) * 100).toFixed(1)),
+      [competitor]: parseFloat(((comp[m.key] / m.max) * 100).toFixed(1)),
+    }))
+  }, [competitor])
+
+  const xMeta = AXIS_METRICS.find(m => m.key === xKey)
+  const yMeta = AXIS_METRICS.find(m => m.key === yKey)
+
+  const selShape = useCallback(
+    (props) => <BubbleShape {...props} szExtent={szExtent} />,
+    [szExtent]
+  )
 
   return (
-    <div style={{ padding: '32px 24px', maxWidth: '1400px', margin: '0 auto' }}>
-      <style>{STYLES}</style>
-
-      {/* Header */}
-      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <div style={{
-          display: 'inline-block',
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(6,182,212,0.2))',
-          border: '1px solid rgba(139,92,246,0.3)',
-          borderRadius: '20px', padding: '6px 16px',
-          fontSize: '11px', color: '#a78bfa', letterSpacing: '2px',
-          marginBottom: '16px',
-        }}>전국 대학 포지셔닝 분석</div>
-        <h1 style={{
-          fontSize: 'clamp(24px, 4vw, 40px)',
-          fontWeight: '900',
-          background: 'linear-gradient(135deg, #fff 0%, #a78bfa 50%, #06b6d4 100%)',
-          backgroundSize: '200% 200%',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          animation: 'gradientShift 4s ease infinite',
-          marginBottom: '8px',
-        }}>전국 239개 대학 포지셔닝 맵</h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>
-          2025년 대학알리미 공시 데이터 기반 · 한세대학교(★) 위치 강조
-        </p>
-      </div>
-
-      {/* Bubble Chart Controls */}
+    <div style={{ minHeight: 'calc(100vh - 56px)', background: '#060E1F', position: 'relative' }}>
+      {/* 배경 격자 */}
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: '16px', padding: '20px 24px',
-        marginBottom: '24px',
-        display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-end',
-      }}>
-        <div>
-          <div style={labelStyle}>X축 지표</div>
-          <select value={xMetric} onChange={e => setXMetric(e.target.value)} style={selectStyle}>
-            {AXIS_METRICS.map(m => (
-              <option key={m.key} value={m.key} style={{ background: '#1a1a2e' }}>{m.label}</option>
-            ))}
-          </select>
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        backgroundImage: `
+          linear-gradient(rgba(0,100,200,0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0,100,200,0.045) 1px, transparent 1px)
+        `,
+        backgroundSize: '44px 44px'
+      }} />
+
+      <style>{`
+        @keyframes gradientShift {
+          0%,100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .select-styled {
+          background: rgba(0,212,255,0.08);
+          border: 1px solid rgba(0,212,255,0.3);
+          color: #e0f0ff; border-radius: 6px;
+          padding: 6px 12px; font-size: 13px;
+          outline: none; cursor: pointer;
+        }
+        .select-styled:hover { border-color: rgba(0,212,255,0.6); }
+        .legend-dot {
+          width: 10px; height: 10px; border-radius: 50%;
+          display: inline-block; margin-right: 5px;
+        }
+      `}</style>
+
+      <div style={{ position: 'relative', zIndex: 1, padding: '32px 24px 48px', maxWidth: 1400, margin: '0 auto' }}>
+
+        {/* 헤더 */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <h1 style={{
+            fontSize: 'clamp(20px, 3vw, 32px)', fontWeight: 900,
+            background: 'linear-gradient(135deg, #00d4ff, #4da6ff, #00d4ff)',
+            backgroundSize: '200%', WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            animation: 'gradientShift 4s ease infinite',
+            letterSpacing: 2, marginBottom: 8
+          }}>
+            전국 대학 포지셔닝 맵
+          </h1>
+          <p style={{ color: 'rgba(160,196,232,0.7)', fontSize: 14 }}>
+            전국 {points.length}개 대학 데이터 기반 · 한세대학교 ⭐ 위치 강조
+          </p>
         </div>
-        <div>
-          <div style={labelStyle}>Y축 지표</div>
-          <select value={yMetric} onChange={e => setYMetric(e.target.value)} style={selectStyle}>
-            {AXIS_METRICS.map(m => (
-              <option key={m.key} value={m.key} style={{ background: '#1a1a2e' }}>{m.label}</option>
+
+        {/* 컨트롤 패널 */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center',
+          background: 'rgba(0,212,255,0.05)', borderRadius: 10,
+          border: '1px solid rgba(0,212,255,0.15)', padding: '14px 20px',
+          marginBottom: 24
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#a0c4e8', fontSize: 12, whiteSpace: 'nowrap' }}>X축</span>
+            <select className="select-styled" value={xKey} onChange={e => setXKey(e.target.value)}>
+              {AXIS_METRICS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#a0c4e8', fontSize: 12, whiteSpace: 'nowrap' }}>Y축</span>
+            <select className="select-styled" value={yKey} onChange={e => setYKey(e.target.value)}>
+              {AXIS_METRICS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#a0c4e8', fontSize: 12, whiteSpace: 'nowrap' }}>버블 크기</span>
+            <select className="select-styled" value={szKey} onChange={e => setSzKey(e.target.value)}>
+              {SIZE_METRICS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+            </select>
+          </div>
+          {/* 범례 */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 12 }}>
+            {Object.entries(TYPE_COLORS).filter(([k]) => !k.startsWith('특별법국')).map(([k, c]) => (
+              <span key={k} style={{ color: '#a0c4e8', display: 'flex', alignItems: 'center' }}>
+                <span className="legend-dot" style={{ background: c }} />
+                {k}
+              </span>
             ))}
-          </select>
-        </div>
-        <div>
-          <div style={labelStyle}>버블 크기</div>
-          <select value={sizeMetric} onChange={e => setSizeMetric(e.target.value)} style={selectStyle}>
-            {SIZE_METRICS.map(m => (
-              <option key={m.key} value={m.key} style={{ background: '#1a1a2e' }}>{m.label}</option>
-            ))}
-          </select>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {Object.entries(TYPE_COLORS).map(([type, color]) => (
-            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: color }} />
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>{type}</span>
-            </div>
-          ))}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#ff4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', color: '#fff' }}>★</div>
-            <span style={{ fontSize: '11px', color: '#ff4444', fontWeight: '700' }}>한세대학교</span>
+            <span style={{ color: '#ff3333', display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: 4 }}>⭐</span> 한세대학교
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* Bubble Chart */}
-      <div style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: '20px', padding: '24px',
-        marginBottom: '48px',
-      }}>
-        <ResponsiveContainer width="100%" height={500}>
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis
-              dataKey="xVal"
-              type="number"
-              name={xLabel}
-              label={{ value: xLabel, position: 'insideBottom', offset: -20, fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-              tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
-              tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-            />
-            <YAxis
-              dataKey="yVal"
-              type="number"
-              name={yLabel}
-              label={{ value: yLabel, angle: -90, position: 'insideLeft', offset: 10, fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-              tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
-              tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-            />
-            <ZAxis dataKey="sz" range={[50, 50]} />
-            <Tooltip content={<CustomTooltip />} />
-            {Object.entries(groupedData).map(([type, data]) => (
+        {/* 버블 차트 */}
+        <div style={{
+          background: 'rgba(0,10,30,0.6)', borderRadius: 12,
+          border: '1px solid rgba(0,212,255,0.1)',
+          padding: '16px 8px 8px 0',
+          marginBottom: 48,
+          boxShadow: '0 4px 32px rgba(0,0,0,0.4)'
+        }}>
+          <ResponsiveContainer width="100%" height={520}>
+            <ScatterChart margin={{ top: 20, right: 30, bottom: 40, left: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,100,200,0.12)" />
+              <XAxis
+                dataKey="x" type="number" name={xMeta?.label}
+                label={{ value: xMeta?.label, position: 'insideBottom', offset: -20, fill: '#a0c4e8', fontSize: 12 }}
+                tick={{ fill: '#607899', fontSize: 11 }}
+                tickFormatter={v => xMeta?.unit === '원' ? (v / 10000).toFixed(0) + '만' : v}
+                domain={['auto', 'auto']}
+              />
+              <YAxis
+                dataKey="y" type="number" name={yMeta?.label}
+                label={{ value: yMeta?.label, angle: -90, position: 'insideLeft', offset: 10, fill: '#a0c4e8', fontSize: 12 }}
+                tick={{ fill: '#607899', fontSize: 11 }}
+                tickFormatter={v => yMeta?.unit === '원' ? (v / 10000).toFixed(0) + '만' : v}
+                domain={['auto', 'auto']}
+              />
+              <ZAxis dataKey="sz" range={[40, 1600]} />
+              <Tooltip
+                content={<CustomTooltip xKey={xKey} yKey={yKey} szKey={szKey} />}
+                cursor={{ strokeDasharray: '3 3', stroke: 'rgba(0,212,255,0.3)' }}
+              />
               <Scatter
-                key={type}
-                name={type}
-                data={data}
-                fill={TYPE_COLORS[type] || '#888'}
-                fillOpacity={0.8}
-                shape={(props) => {
-                  const { cx, cy, payload } = props
-                  const isHansei = payload.name === '한세대학교'
-
-                  // ZAxis r prop이 불안정하므로 직접 계산
-                  const [minSz, maxSz] = szExtent
-                  const sz = payload.sz || 1
-                  const t = maxSz > minSz ? (sz - minSz) / (maxSz - minSz) : 0.5
-                  const r = 5 + Math.sqrt(t) * 16  // 5~21px 범위
-
-                  if (isHansei) {
-                    return (
-                      <g>
-                        <circle cx={cx} cy={cy} r={r * 2} fill="rgba(255,68,68,0.12)" style={{ animation: 'pulseStar 2s ease-in-out infinite' }} />
-                        <circle cx={cx} cy={cy} r={r} fill="#ff4444" stroke="#fff" strokeWidth={2} fillOpacity={0.95} />
-                        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize={Math.max(10, r * 0.85)} fontWeight="bold">★</text>
-                        <text x={cx + r + 5} y={cy} textAnchor="start" dominantBaseline="middle" fill="#ff4444" fontSize={11} fontWeight="700">한세대</text>
-                      </g>
-                    )
-                  }
-                  return (
-                    <circle
-                      cx={cx} cy={cy} r={r}
-                      fill={TYPE_COLORS[type] || '#888'}
-                      fillOpacity={0.75}
-                      stroke="rgba(255,255,255,0.2)"
-                      strokeWidth={0.5}
-                    />
-                  )
-                }}
+                data={points.filter(p => !p.isHansei)}
+                shape={selShape}
               />
-            ))}
-          </ScatterChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Radar Chart Section */}
-      <div style={{ marginBottom: '16px', textAlign: 'center' }}>
-        <h2 style={{
-          fontSize: 'clamp(20px, 3vw, 32px)',
-          fontWeight: '800',
-          background: 'linear-gradient(135deg, #fff, #a78bfa)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '8px',
-        }}>실시간 대학 비교 레이더</h2>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>비교 대학을 선택하세요 (경쟁 대학군 기준 정규화)</p>
-      </div>
-
-      {/* Radar Controls */}
-      <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: '16px', padding: '16px 24px',
-        marginBottom: '24px',
-        display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center',
-      }}>
-        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginRight: '8px' }}>비교 대학 선택:</span>
-        {radarAllUnivs.map((name, idx) => {
-          const isSelected = radarSelected.includes(name)
-          const isHansei = name === '한세대학교'
-          return (
-            <button
-              key={name}
-              onClick={() => {
-                if (isHansei) return
-                setRadarSelected(prev =>
-                  prev.includes(name)
-                    ? prev.filter(n => n !== name)
-                    : [...prev, name]
-                )
-              }}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '20px',
-                border: `1px solid ${isSelected ? RADAR_COLORS[idx] : 'rgba(255,255,255,0.1)'}`,
-                background: isSelected ? `${RADAR_COLORS[idx]}22` : 'transparent',
-                color: isSelected ? RADAR_COLORS[idx] : 'rgba(255,255,255,0.4)',
-                fontSize: '12px', cursor: isHansei ? 'default' : 'pointer',
-                transition: 'all 0.2s',
-                fontWeight: isHansei ? '700' : '400',
-              }}
-            >
-              {isHansei ? '★ ' : ''}{name}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Radar Chart */}
-      <div style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(139,92,246,0.15)',
-        borderRadius: '20px', padding: '24px',
-      }}>
-        <ResponsiveContainer width="100%" height={460}>
-          <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-            <PolarGrid stroke="rgba(255,255,255,0.08)" />
-            <PolarAngleAxis
-              dataKey="metric"
-              tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '600' }}
-            />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9 }}
-              tickCount={5}
-            />
-            {radarSelected.map((name, idx) => (
-              <Radar
-                key={name}
-                name={name}
-                dataKey={name}
-                stroke={RADAR_COLORS[idx % RADAR_COLORS.length]}
-                fill={RADAR_COLORS[idx % RADAR_COLORS.length]}
-                fillOpacity={name === '한세대학교' ? 0.3 : 0.1}
-                strokeWidth={name === '한세대학교' ? 3 : 1.5}
+              <Scatter
+                data={points.filter(p => p.isHansei)}
+                shape={selShape}
               />
-            ))}
-            <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              formatter={(value, entry) => (
-                <span style={{
-                  color: entry.color,
-                  fontSize: '12px',
-                  fontWeight: value === '한세대학교' ? '700' : '400',
-                }}>
-                  {value === '한세대학교' ? '★ ' : ''}{value}
-                </span>
-              )}
-            />
-            <Tooltip
-              contentStyle={{
-                background: 'rgba(10,10,26,0.95)',
-                border: '1px solid rgba(139,92,246,0.3)',
-                borderRadius: '10px',
-                color: '#fff',
-                fontSize: '12px',
-              }}
-              formatter={(value, name) => [`${value}점`, name]}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-        <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>
-            * 각 지표를 비교군 최댓값 기준으로 100점 정규화 표시 · 점수가 높을수록 우수
-          </p>
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* 레이더 차트 섹션 */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: 12, marginBottom: 20
+          }}>
+            <div>
+              <h2 style={{
+                fontSize: 'clamp(16px, 2.5vw, 22px)', fontWeight: 700,
+                color: '#00d4ff', letterSpacing: 1, marginBottom: 4
+              }}>
+                실시간 대학 비교 분석
+              </h2>
+              <p style={{ color: 'rgba(160,196,232,0.7)', fontSize: 13 }}>
+                6개 핵심 지표 레이더 차트
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ color: '#a0c4e8', fontSize: 13 }}>비교 대학:</span>
+              <select className="select-styled" value={competitor} onChange={e => setCompetitor(e.target.value)}>
+                {COMPETITORS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'rgba(0,10,30,0.6)', borderRadius: 12,
+            border: '1px solid rgba(0,212,255,0.1)',
+            padding: '24px 8px',
+            boxShadow: '0 4px 32px rgba(0,0,0,0.4)'
+          }}>
+            <ResponsiveContainer width="100%" height={420}>
+              <RadarChart data={radarData} margin={{ top: 10, right: 60, bottom: 10, left: 60 }}>
+                <PolarGrid stroke="rgba(0,100,200,0.25)" />
+                <PolarAngleAxis
+                  dataKey="metric"
+                  tick={{ fill: '#a0c4e8', fontSize: 13, fontWeight: 500 }}
+                />
+                <PolarRadiusAxis
+                  angle={90} domain={[0, 100]}
+                  tick={{ fill: '#607899', fontSize: 10 }}
+                  tickCount={5}
+                />
+                <Radar
+                  name="한세대학교"
+                  dataKey="한세대"
+                  stroke="#ff3333" fill="#ff3333" fillOpacity={0.25}
+                  strokeWidth={2}
+                />
+                <Radar
+                  name={competitor}
+                  dataKey={competitor}
+                  stroke="#00d4ff" fill="#00d4ff" fillOpacity={0.15}
+                  strokeWidth={2}
+                />
+                <Legend
+                  wrapperStyle={{ color: '#a0c4e8', fontSize: 13, paddingTop: 8 }}
+                />
+                <Tooltip content={<RadarTooltip />} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 간단 통계 카드 */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 12, marginTop: 24
+        }}>
+          {[
+            { label: '비교 대학 수', value: points.length + '개', color: '#00d4ff' },
+            { label: '한세대 취업률', value: '71%', color: '#ff3333' },
+            { label: '한세대 경쟁률', value: '11.7:1', color: '#ff3333' },
+            { label: '한세대 장학금', value: '431만원', color: '#ff3333' },
+          ].map((s, i) => (
+            <div key={i} style={{
+              background: 'rgba(0,10,30,0.7)',
+              border: `1px solid ${s.color}33`,
+              borderRadius: 8, padding: '14px 16px',
+              textAlign: 'center'
+            }}>
+              <div style={{ color: 'rgba(160,196,232,0.6)', fontSize: 11, marginBottom: 4 }}>{s.label}</div>
+              <div style={{
+                color: s.color, fontSize: 22, fontWeight: 700,
+                textShadow: `0 0 12px ${s.color}88`
+              }}>{s.value}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

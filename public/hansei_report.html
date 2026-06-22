@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>한세대학교 경쟁력 분석 보고서 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --primary: #1a3f7a;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --strength: #1d4ed8;
+  --improve: #dc2626;
+  --orange: #ea580c;
+  --gray: #64748b;
+  --border: #e2e8f0;
+  --bg-light: #f8fafc;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: 'Noto Sans KR', sans-serif; color: #1e293b; line-height: 1.7; }
+body { background: #fff; }
+@media print {
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+}
+/* ── 공통 레이아웃 ── */
+.page { max-width: 900px; margin: 0 auto; padding: 60px 48px; }
+.section { margin-bottom: 64px; }
+h1,h2,h3,h4 { font-weight: 700; line-height: 1.4; }
+h2 { font-size: 22px; color: var(--primary); padding-bottom: 10px; border-bottom: 2px solid var(--primary); margin-bottom: 24px; }
+h3 { font-size: 17px; color: var(--accent); margin-bottom: 12px; }
+h4 { font-size: 14px; color: #475569; margin-bottom: 8px; font-weight: 600; }
+p { font-size: 14px; color: #334155; line-height: 1.9; margin-bottom: 12px; }
+
+/* ── 표지 ── */
+.cover {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  border-left: 6px solid var(--primary);
+  padding: 80px 60px;
+}
+.cover-badge {
+  display: inline-block; background: var(--accent-light); color: var(--accent);
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+}
+.cover h1 { font-size: 38px; color: var(--primary); margin-bottom: 12px; letter-spacing: -1px; }
+.cover .subtitle { font-size: 18px; color: var(--gray); margin-bottom: 40px; }
+.cover-divider { width: 60px; height: 3px; background: var(--accent); margin-bottom: 40px; }
+.cover-info { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cover-info-item { padding: 16px 20px; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--accent); }
+.cover-info-label { font-size: 11px; color: var(--gray); font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+.cover-info-value { font-size: 14px; color: var(--primary); font-weight: 700; }
+
+/* ── 목차 ── */
+.toc { list-style: none; }
+.toc li { display: flex; align-items: baseline; gap: 8px; padding: 8px 0; border-bottom: 1px dotted var(--border); font-size: 14px; }
+.toc-num { color: var(--accent); font-weight: 700; min-width: 28px; }
+.toc-dots { flex: 1; border-bottom: 1px dotted #cbd5e1; }
+.toc-page { color: var(--gray); font-size: 13px; }
+
+/* ── 개요 테이블 ── */
+.info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px; }
+.info-table th, .info-table td { padding: 10px 14px; border: 1px solid var(--border); vertical-align: top; }
+.info-table th { background: var(--bg-light); color: var(--primary); font-weight: 700; width: 140px; }
+.info-table td { color: #334155; }
+
+/* ── KPI 카드 그리드 ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.kpi-card { padding: 16px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); }
+.kpi-card.strength { border-left: 4px solid var(--strength); }
+.kpi-card.improve { border-left: 4px solid var(--improve); }
+.kpi-card.orange { border-left: 4px solid var(--orange); }
+.kpi-label { font-size: 11px; color: var(--gray); font-weight: 600; margin-bottom: 4px; }
+.kpi-value { font-size: 26px; font-weight: 900; color: var(--primary); }
+.kpi-value.s { color: var(--strength); }
+.kpi-value.r { color: var(--improve); }
+.kpi-value.o { color: var(--orange); }
+.kpi-note { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+/* ── 바 차트 ── */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 12px; color: #475569; width: 80px; text-align: right; white-space: nowrap; flex-shrink: 0; }
+.bar-outer { flex: 1; background: #f1f5f9; border-radius: 4px; height: 22px; position: relative; overflow: hidden; }
+.bar-inner { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+.bar-val { font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+.bar-val-outside { font-size: 11px; color: #475569; margin-left: 6px; flex-shrink: 0; }
+.hansei-bar { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
+.comp-bar { background: #cbd5e1; }
+.comp-bar .bar-val { color: #64748b; }
+
+/* ── 분석 박스 ── */
+.analysis-box { background: var(--accent-light); border-radius: 10px; padding: 18px 22px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
+.analysis-box.warn { background: #fef2f2; border-left-color: var(--improve); }
+.analysis-box.orange { background: #fff7ed; border-left-color: var(--orange); }
+.analysis-box h4 { color: var(--accent); margin-bottom: 6px; }
+.analysis-box.warn h4 { color: var(--improve); }
+.analysis-box.orange h4 { color: var(--orange); }
+
+/* ── 비교 테이블 ── */
+.comp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 24px; }
+.comp-table th { background: var(--primary); color: #fff; padding: 10px 12px; text-align: center; }
+.comp-table td { padding: 8px 12px; border: 1px solid var(--border); text-align: center; }
+.comp-table tr:nth-child(even) td { background: var(--bg-light); }
+.comp-table .hansei-row td { background: #eff6ff; font-weight: 700; border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
+.comp-table .best { color: var(--strength); font-weight: 700; }
+.comp-table .worst { color: var(--improve); }
+
+/* ── 정책 카드 ── */
+.policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.policy-card { padding: 18px 20px; border-radius: 10px; border: 1px solid var(--border); }
+.policy-card-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+.policy-card p { font-size: 12px; }
+.policy-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+.tag-positive { background: #dcfce7; color: #166534; }
+.tag-challenge { background: #fef9c3; color: #854d0e; }
+.tag-risk { background: #fee2e2; color: #991b1b; }
+
+/* ── 권고사항 ── */
+.rec-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.rec-item { display: flex; gap: 14px; padding: 16px 18px; border-radius: 10px; background: var(--bg-light); border: 1px solid var(--border); }
+.rec-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rec-content strong { display: block; font-size: 14px; color: var(--primary); margin-bottom: 4px; }
+.rec-content p { font-size: 13px; margin: 0; }
+
+/* ── 구분선 ── */
+.section-divider { width: 100%; height: 1px; background: var(--border); margin: 48px 0; }
+.page-break-hint { text-align: center; color: #cbd5e1; font-size: 11px; padding: 8px; letter-spacing: 2px; }
+
+/* ── 네비게이션 ── */
+.nav-top {
+  position: sticky; top: 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border); z-index: 100;
+  padding: 10px 48px; display: flex; align-items: center; gap: 20px;
+  max-width: 100%;
+}
+.nav-top a { font-size: 12px; color: var(--gray); text-decoration: none; }
+.nav-top a:hover { color: var(--accent); }
+.nav-brand { font-size: 14px; font-weight: 700; color: var(--primary); margin-right: 12px; }
+</style>
+</head>
+<body>
+
+<nav class="nav-top no-print">
+  <span class="nav-brand">한세대학교 경쟁력 분석 보고서</span>
+  <a href="#overview">개요</a>
+  <a href="#strength">강점 분석</a>
+  <a href="#improve">개선 과제</a>
+  <a href="#compare">비교군 분석</a>
+  <a href="#policy">정책 대응</a>
+  <a href="#conclusion">결론</a>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 1: 표지 + 목차 + 한세대 개요
+══════════════════════════════════════════════════════════════ -->
+
+<div id="cover">
+  <div class="cover">
+    <div class="cover-badge">CONFIDENTIAL · 내부 보고용</div>
+    <h1>한세대학교<br />경쟁력 분석 보고서</h1>
+    <p class="subtitle">대학알리미 공시 기준 · 경기 지역 동규모 사립대 비교 분석</p>
+    <div class="cover-divider"></div>
+
+    <div class="cover-info">
+      <div class="cover-info-item">
+        <div class="cover-info-label">데이터 기준</div>
+        <div class="cover-info-value">2025년 대학알리미 공시</div>
+      </div>
+      <div class="cover-info-item">
+        <div class="cover-info-label">비교 대학</div>
+        <div class="cover-info-value">경기 지역 사립대 5개교</div>
+      </div>
+      <div class="cover-info-item">
+        <div class="cover-info-label">분석 지표</div>
+        <div class="cover-info-value">9개 핵심 교육 지표</div>
+      </div>
+      <div class="cover-info-item">
+        <div class="cover-info-label">작성 기준일</div>
+        <div class="cover-info-value">2025년 6월</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<div id="toc" class="section">
+  <h2>목 차</h2>
+  <ul class="toc">
+    <li><span class="toc-num">I.</span> 한세대학교 기관 개요<span class="toc-dots"></span><span class="toc-page">3p</span></li>
+    <li><span class="toc-num">II.</span> 강점 지표 분석 — 취업률 · 경쟁률 · 장학금 · 교육비<span class="toc-dots"></span><span class="toc-page">5p</span></li>
+    <li><span class="toc-num">III.</span> 개선 과제 분석 — 충원율 · 교원확보율 · 강의비율 · 기숙사<span class="toc-dots"></span><span class="toc-page">9p</span></li>
+    <li><span class="toc-num">IV.</span> 비교군 종합 비교표 및 시각화<span class="toc-dots"></span><span class="toc-page">13p</span></li>
+    <li><span class="toc-num">V.</span> 교육부 2025~2026 정책 대응 전략<span class="toc-dots"></span><span class="toc-page">16p</span></li>
+    <li><span class="toc-num">VI.</span> 종합 결론 및 권고사항<span class="toc-dots"></span><span class="toc-page">19p</span></li>
+  </ul>
+</div>
+
+<div id="overview" class="section">
+  <h2>I. 한세대학교 기관 개요</h2>
+
+  <table class="info-table">
+    <tr><th>대학명</th><td>한세대학교</td><th>설립 유형</th><td>사립</td></tr>
+    <tr><th>소재지</th><td>경기도 군포시</td><th>설립연도</th><td>1953년 (설립 72주년)</td></tr>
+    <tr><th>재학생 수</th><td>2,509명</td><th>전임교원 수</th><td>100명</td></tr>
+    <tr><th>입학정원</th><td>566명</td><th>졸업생 수</th><td>588명</td></tr>
+    <tr><th>평균 등록금</th><td>8,859,600원 / 년</td><th>외국인 유학생</th><td>22명</td></tr>
+    <tr><th>혁신 전략</th><td colspan="3">REACH 전략 (학사유연성·학생성공지원·융합학습·교양교육·성과관리, 18대 과제)</td></tr>
+  </table>
+
+  <h3>핵심 지표 한눈에 보기</h3>
+  <div class="kpi-grid">
+    <div class="kpi-card strength"><div class="kpi-label">취업률</div><div class="kpi-value s">71%</div><div class="kpi-note">비교군 1위</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">경쟁률</div><div class="kpi-value s">11.7:1</div><div class="kpi-note">공동 1위</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">장학금</div><div class="kpi-value s">431만원</div><div class="kpi-note">비교군 1위</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">충원율</div><div class="kpi-value s">99.8%</div><div class="kpi-note">사실상 완전 충원</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">교원확보율</div><div class="kpi-value o">62.89%</div><div class="kpi-note">법정기준 미달</div></div>
+    <div class="kpi-card improve"><div class="kpi-label">전임강의비율</div><div class="kpi-value r">48.3%</div><div class="kpi-note">비교군 최저</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">기숙사 수용률</div><div class="kpi-value o">12.2%</div><div class="kpi-note">개선 필요</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">1인당 교육비</div><div class="kpi-value s">1,345만원</div><div class="kpi-note">비교군 1위</div></div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>📊 기관 종합 평가</h4>
+    <p>한세대학교는 2025년 대학알리미 공시 기준 경기 지역 동규모 사립대 6개교 중 <strong>취업률·경쟁률·장학금·1인당 교육비 4개 지표에서 1위</strong>를 기록하는 강한 교육 경쟁력을 보유하고 있습니다. 반면 전임교원 강의비율(48.3%, 최저)과 교원확보율(62.89%) 개선이 중장기 과제로 남아 있으며, 교육부 성과 중심 재정지원 체계에서 지속적인 경쟁 우위를 유지하기 위한 전략적 대응이 필요합니다.</p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<div class="page-break-hint">— 2 / 20 —</div>
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 2: 강점 지표 분석
+══════════════════════════════════════════════════════════════ -->
+
+<div id="strength" class="section">
+  <h2>II. 강점 지표 분석</h2>
+
+  <!-- 취업률 -->
+  <h3 id="employment">① 취업률 — 비교군 최고 (71%)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:84%"><span class="bar-val">71.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:76%"><span class="bar-val">64.1%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:76%"><span class="bar-val">64.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:69%"><span class="bar-val">58.1%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:69%"><span class="bar-val">58.4%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:70%"><span class="bar-val">59.0%</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>💼 분석</h4>
+    <p>한세대학교의 취업률 71%는 비교군 평균(60.6%) 대비 <strong>+10.4%p 초과 달성</strong>한 수치로, 경기 지역 사립대 중 압도적 1위입니다. 최신 공시에서는 73.5%(전국 평균 64.6% 대비 +8.9%p)까지 상승하며 우상향 추세를 유지하고 있습니다.</p>
+    <p>이는 ① 특성화 학과(신학·음악·사회복지) 중심의 전문 진로 경로, ② 산학협력 네트워크 강화, ③ REACH 전략 내 '학생성공지원' 축의 맞춤형 취업지원 프로그램이 복합적으로 기여한 결과로 분석됩니다.</p>
+    <p><strong>교육부 RISE 사업 및 대학혁신지원사업의 성과 지표에서 취업률은 핵심 평가 요소</strong>로, 한세대의 높은 취업률은 지속적인 재정지원 수혜의 근거가 됩니다.</p>
+  </div>
+
+  <!-- 경쟁률 -->
+  <h3 id="competition">② 신입생 경쟁률 — 공동 1위 (11.7:1)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:94%"><span class="bar-val">11.7:1</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:94%"><span class="bar-val">11.7:1</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:71%"><span class="bar-val">8.8:1</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:68%"><span class="bar-val">8.5:1</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:67%"><span class="bar-val">8.3:1</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:56%"><span class="bar-val">6.9:1</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>🎯 분석</h4>
+    <p>신입생 경쟁률 11.7:1은 안양대와 공동 1위로, 비교군 평균(9.3:1) 대비 +2.4 높은 수준입니다. 높은 경쟁률은 <strong>브랜드 인지도와 입학 선호도의 직접적 지표</strong>로, 충원 안정성과도 직결됩니다. 2026학년도 수시 등록률이 95%까지 상승하는 추세와 맞물려, 한세대의 신입생 유치 경쟁력은 지속 강화되고 있습니다.</p>
+  </div>
+
+  <!-- 장학금 -->
+  <h3 id="scholarship">③ 1인당 장학금 — 비교군 최고 (431만원)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:92%"><span class="bar-val">431만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:90%"><span class="bar-val">423만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:85%"><span class="bar-val">403만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:78%"><span class="bar-val">368만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:78%"><span class="bar-val">366만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:77%"><span class="bar-val">366만원</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>💰 분석</h4>
+    <p>1인당 장학금 431만원은 비교군 평균(385만원) 대비 <strong>+46만원 초과 지원</strong>하는 수준으로, 재학생의 학업 지속률 및 중도 탈락률에 직접적으로 기여합니다. 등록금(8,860만원/년) 기준으로 환산 시 장학금 지원율은 약 48.7%에 달해, 실질 학생 부담이 매우 낮습니다. 이는 <strong>충원율 99.8% 유지의 핵심 요인</strong> 중 하나입니다.</p>
+  </div>
+
+  <!-- 1인당 교육비 -->
+  <h3 id="education-cost">④ 1인당 교육비 — 비교군 최고 (1,345만원)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:90%"><span class="bar-val">1,345만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:88%"><span class="bar-val">1,316만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:89%"><span class="bar-val">1,334만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:87%"><span class="bar-val">1,309만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:82%"><span class="bar-val">1,224만원</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:80%"><span class="bar-val">1,201만원</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>🏫 분석</h4>
+    <p>1인당 교육비 1,345만원은 비교군 1위로, 학생 1인에게 투입되는 교육 자원이 가장 풍부함을 의미합니다. 높은 교육비 투자는 교육 품질 유지의 기반이 되며, 취업률 1위와 함께 <strong>'투입 대비 성과' 측면에서 효율적인 교육 운영</strong>을 보여줍니다. 교육부 성과 지표에서도 긍정적으로 평가되는 항목입니다.</p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<div class="page-break-hint">— 8 / 20 —</div>
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 3: 개선 과제 분석
+══════════════════════════════════════════════════════════════ -->
+
+<div id="improve" class="section">
+  <h2>III. 개선 과제 분석</h2>
+
+  <!-- 충원율 -->
+  <h3 id="fill">① 신입생 충원율 — 99.8% (사실상 완전 충원, 미세 개선 필요)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:80%"><span class="bar-val">100.4%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:79.7%"><span class="bar-val">100.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:79.7%"><span class="bar-val">100.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:79.7%"><span class="bar-val">100.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:79.7%"><span class="bar-val">100.0%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:79.5%"><span class="bar-val">99.8%</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box orange">
+    <h4>⚠ 분석</h4>
+    <p>충원율 99.8%는 비교군 최저이나, 사실상 완전 충원에 근접한 수준입니다. 2026학년도 수시 등록률이 95%까지 상승하는 등 꾸준한 개선 추세를 보이고 있습니다. 다만 교육부 2040 대학 구조개선 마스터플랜에서 <strong>충원율이 핵심 생존 지표</strong>로 활용되므로, 100% 이상을 목표로 한 지속적 관리가 중요합니다.</p>
+    <p><strong>권고:</strong> 다양한 모집 전형 확대 및 지역 고교 연계 프로그램을 통해 충원율 100% 달성 목표를 설정하고, 재학생 유지 프로그램도 병행해야 합니다.</p>
+  </div>
+
+  <!-- 교원확보율 -->
+  <h3 id="faculty">② 교원확보율(정원 기준) — 62.89% (법정 기준 미달)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:100%"><span class="bar-val">74.79%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:89%"><span class="bar-val">66.67%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:88%"><span class="bar-val">66.27%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:85%"><span class="bar-val">63.68%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:84%"><span class="bar-val">62.89%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:82%"><span class="bar-val">61.21%</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box warn">
+    <h4>🔴 분석</h4>
+    <p>교원확보율 62.89%는 법정 기준(100% 충족 목표) 대비 미달로, 비교군 평균(66.1%)에도 미치지 못합니다. 이는 교육부 대학혁신지원사업 성과 지표에서 <strong>감점 요인</strong>이 될 수 있으며, 장기적으로 교육 품질 저하로 이어질 위험이 있습니다.</p>
+    <p><strong>권고:</strong> 향후 3년간 매년 5~6명 수준의 전임교원 증원 계획을 수립하고, 신임 교원 채용 시 산업체 경력자 비중을 높여 취업 연계 강의의 질도 동시에 제고해야 합니다.</p>
+  </div>
+
+  <!-- 전임교원 강의비율 -->
+  <h3 id="lecture">③ 전임교원 강의비율 — 48.3% (비교군 최저)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:91%"><span class="bar-val">67.3%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:91%"><span class="bar-val">66.9%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:91%"><span class="bar-val">66.9%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:87%"><span class="bar-val">64.3%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:80%"><span class="bar-val">59.2%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:65%"><span class="bar-val">48.3%</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box warn">
+    <h4>🔴 분석 — 가장 시급한 개선 과제</h4>
+    <p>전임교원 강의비율 48.3%는 비교군 최저이며, 비교군 평균(64.9%) 대비 <strong>-16.6%p 낮은 수준</strong>입니다. 이는 강의의 절반 이상이 시간강사·겸임교원에 의해 운영됨을 의미하며, 교육 일관성과 연구·지도 역량에 영향을 미칩니다.</p>
+    <p>교육부는 대학혁신지원사업 성과 평가에서 전임교원 강의비율을 중요 지표로 활용하며, 미달 시 사업비 감액이 적용될 수 있습니다.</p>
+    <p><strong>권고:</strong> 중단기 목표로 전임 강의비율을 60% 이상으로 끌어올리기 위한 전략적 교원 채용 계획 수립이 필수적입니다. 특히 기존 시간강사 중 우수 인력을 전임 전환하는 방안을 검토해야 합니다.</p>
+  </div>
+
+  <!-- 기숙사 수용률 -->
+  <h3 id="dormitory">④ 기숙사 수용률 — 12.2% (시설 확충 필요)</h3>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <span class="bar-label">평택대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:100%"><span class="bar-val">30.1%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한신대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:47%"><span class="bar-val">14.2%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">협성대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:41%"><span class="bar-val">12.5%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">한세대</span>
+      <div class="bar-outer"><div class="bar-inner hansei-bar" style="width:40%"><span class="bar-val">12.2%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">성결대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:37%"><span class="bar-val">11.1%</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">안양대</span>
+      <div class="bar-outer"><div class="bar-inner comp-bar" style="width:23%"><span class="bar-val">6.8%</span></div></div>
+    </div>
+  </div>
+
+  <div class="analysis-box orange">
+    <h4>🟠 분석</h4>
+    <p>기숙사 수용률 12.2%는 재학생 2,509명 중 약 306명만 수용 가능한 수준입니다. 비교군 평균(14.5%)에 미치지 못하며, 평택대(30.1%)와는 큰 격차가 있습니다. 군포시의 높은 주거비를 고려할 때 학생 유치 및 재학생 만족도에 부정적 영향을 미칠 수 있습니다.</p>
+    <p><strong>권고:</strong> 신규 기숙사 건립 또는 주변 임대형 기숙사(하숙형·오피스텔 협약) 활용을 통한 수용 인원 확대가 필요합니다. 수용률 20% 이상을 중기 목표로 설정하는 것이 적절합니다.</p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<div class="page-break-hint">— 12 / 20 —</div>
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 4: 비교군 종합 비교표
+══════════════════════════════════════════════════════════════ -->
+
+<div id="compare" class="section">
+  <h2>IV. 비교군 종합 비교표 및 시각화</h2>
+
+  <h3>9개 핵심 지표 종합 비교</h3>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">
+    파란색 강조 = 한세대학교 행 / <span style="color:var(--strength);font-weight:700">파란 숫자</span> = 해당 지표 1위 / <span style="color:var(--improve)">빨간 숫자</span> = 최하위
+  </p>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>대학</th>
+        <th>취업률 (%)</th>
+        <th>경쟁률</th>
+        <th>충원율 (%)</th>
+        <th>장학금 (만원)</th>
+        <th>교육비 (만원)</th>
+        <th>교원확보율 (%)</th>
+        <th>강의비율 (%)</th>
+        <th>기숙사 (%)</th>
+        <th>교원1인당<br>학생수</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="hansei-row">
+        <td><strong>⭐ 한세대</strong></td>
+        <td class="best">71.0</td>
+        <td class="best">11.7</td>
+        <td class="worst">99.8</td>
+        <td class="best">431</td>
+        <td class="best">1,345</td>
+        <td class="worst">62.89</td>
+        <td class="worst">48.3</td>
+        <td>12.2</td>
+        <td>35.59</td>
+      </tr>
+      <tr>
+        <td>안양대</td><td>64.1</td><td class="best">11.7</td><td class="best">100.4</td>
+        <td>403</td><td>1,309</td><td class="worst">61.21</td><td class="best">66.9</td>
+        <td class="worst">6.8</td><td>35.92</td>
+      </tr>
+      <tr>
+        <td>성결대</td><td>64.0</td><td>8.5</td><td>100.0</td>
+        <td class="worst">366</td><td class="worst">1,201</td><td>66.27</td><td>59.2</td>
+        <td>11.1</td><td>34.49</td>
+      </tr>
+      <tr>
+        <td>협성대</td><td class="worst">58.1</td><td class="worst">8.3</td><td>100.0</td>
+        <td>368</td><td>1,316</td><td>63.68</td><td>64.3</td>
+        <td>12.5</td><td>35.69</td>
+      </tr>
+      <tr>
+        <td>평택대</td><td>58.4</td><td>8.8</td><td>100.0</td>
+        <td>423</td><td>1,334</td><td>66.67</td><td class="best">67.3</td>
+        <td class="best">30.1</td><td class="best">33.58</td>
+      </tr>
+      <tr>
+        <td>한신대</td><td>59.0</td><td class="worst">6.9</td><td>100.0</td>
+        <td class="worst">366</td><td>1,224</td><td class="best">74.79</td><td class="best">66.9</td>
+        <td>14.2</td><td class="best">31.15</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>지표별 순위 요약</h3>
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+    <div class="kpi-card strength"><div class="kpi-label">취업률 순위</div><div class="kpi-value s">1위</div><div class="kpi-note">71.0%</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">경쟁률 순위</div><div class="kpi-value s">1위</div><div class="kpi-note">공동 1위</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">장학금 순위</div><div class="kpi-value s">1위</div><div class="kpi-note">431만원</div></div>
+    <div class="kpi-card strength"><div class="kpi-label">교육비 순위</div><div class="kpi-value s">1위</div><div class="kpi-note">1,345만원</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">충원율 순위</div><div class="kpi-value o">6위</div><div class="kpi-note">99.8%</div></div>
+    <div class="kpi-card improve"><div class="kpi-label">교원확보율 순위</div><div class="kpi-value r">5위</div><div class="kpi-note">62.89%</div></div>
+    <div class="kpi-card improve"><div class="kpi-label">강의비율 순위</div><div class="kpi-value r">6위</div><div class="kpi-note">48.3%</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">기숙사 순위</div><div class="kpi-value o">4위</div><div class="kpi-note">12.2%</div></div>
+  </div>
+
+  <div class="analysis-box">
+    <h4>📈 종합 포지셔닝 분석</h4>
+    <p>한세대학교는 <strong>교육 성과 지표(취업·경쟁·장학금·교육비)에서는 비교군 최강</strong>이나, <strong>교육 인프라 지표(교원확보율·강의비율·기숙사)에서는 약점</strong>을 보이는 이중 구조를 가지고 있습니다.</p>
+    <p>이는 "소규모 정예 특성화 대학"의 전형적인 패턴으로, 학생 만족도와 취업 성과는 높지만 외형적 자원 투입 지표에서 뒤처지는 양상을 보입니다. 교육부의 성과 중심 재정지원 체계에서는 강점이 더 크게 평가받을 수 있으나, 인프라 개선이 동반되지 않으면 장기적 경쟁력 유지에 한계가 있습니다.</p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<div class="page-break-hint">— 15 / 20 —</div>
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 5: 교육부 정책 대응 전략
+══════════════════════════════════════════════════════════════ -->
+
+<div id="policy" class="section">
+  <h2>V. 교육부 2025~2026 정책 대응 전략</h2>
+
+  <h3>교육부 주요 정책 현황</h3>
+  <div class="policy-grid">
+    <div class="policy-card">
+      <div class="policy-tag tag-positive">기회</div>
+      <div class="policy-card-title">① 2025~2027 대학혁신지원사업</div>
+      <p>일반대학 138개교 대상 총 1조 7,753억 원 지원. 취업률·충원율 성과 지표 중심으로 상위 대학 재정지원 집중. 한세대의 취업률 71%(1위)는 최우선 수혜 근거. 2026년 2년 차 진입으로 성과 관리 핵심 시기.</p>
+    </div>
+    <div class="policy-card">
+      <div class="policy-tag tag-positive">기회</div>
+      <div class="policy-card-title">② RISE 2025 전국 시행</div>
+      <p>지역혁신중심 대학지원체계(RISE) 전국 시행 원년. 국비+지방비 합산 약 2조 4,000억 원 규모. 경기 지역 연계 산학협력·지역 인재 정주 생태계 구축이 목표. 한세대의 취업 강점 + 경기 지역 위치가 전략적 강점.</p>
+    </div>
+    <div class="policy-card">
+      <div class="policy-tag tag-challenge">도전</div>
+      <div class="policy-card-title">③ 대학기본역량진단 폐지</div>
+      <p>2024년 마지막 시행 후 제도 사실상 폐지. 2025년부터 '재정진단·기관인증' 방식으로 전환. 경영위기대학 지정 방지가 핵심 — 충원율·재정건전성 관리 중요. 예비경영위기대학 30개교 컨설팅 진행 중.</p>
+    </div>
+    <div class="policy-card">
+      <div class="policy-tag tag-challenge">도전</div>
+      <div class="policy-card-title">④ 2040 대학 구조개선 마스터플랜</div>
+      <p>학령인구 감소 대응 장기 계획 수립 중. 충원율·재학생 유지가 대학 생존의 핵심 지표. D등급 신설 및 연속 미흡 시 5년 지원 제한(2027년 적용). 충원율 99.8%의 100% 달성이 시급 과제.</p>
+    </div>
+    <div class="policy-card">
+      <div class="policy-tag tag-challenge">도전</div>
+      <div class="policy-card-title">⑤ 글로컬대학30 사업</div>
+      <p>2023~2025년 30개교 선정, 5년간 교당 1,000억 원 지원. 한세대는 현재 미선정 상태. 수도권 대학은 지원 대상에서 제외되거나 불리한 조건. 다음 주기 또는 비수도권 대학과 연합 신청 전략 검토 필요.</p>
+    </div>
+    <div class="policy-card">
+      <div class="policy-tag tag-positive">기회</div>
+      <div class="policy-card-title">⑥ 전공자율선택제 확산</div>
+      <p>교육부 주도 학사제도 유연화 정책. 무전공·자율전공학부 확대 지원. 한세대 REACH 전략의 '학사유연성' 축과 직접 연계. AI부트캠프·무전공 학부 운영 경험이 정책 부합 사례로 인정.</p>
+    </div>
+  </div>
+
+  <h3>한세대학교 대응 전략 매트릭스</h3>
+
+  <table class="comp-table">
+    <thead>
+      <tr><th>정책</th><th>한세대 현황</th><th>전략 방향</th><th>우선순위</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>대학혁신지원사업</td>
+        <td style="color:var(--strength);font-weight:700">취업률 1위 — 우위</td>
+        <td>성과 지표 유지·강화, 교원확보율 개선 병행</td>
+        <td><span style="color:var(--strength);font-weight:700">최우선</span></td>
+      </tr>
+      <tr>
+        <td>RISE 지역혁신</td>
+        <td>경기 위치 — 잠재 기회</td>
+        <td>지역 산업체 MOU 확대, 지역 인재 정주 프로그램</td>
+        <td><span style="color:var(--orange)">높음</span></td>
+      </tr>
+      <tr>
+        <td>재정진단·기관인증</td>
+        <td>충원율 99.8% — 관리 필요</td>
+        <td>충원율 100% 목표 설정, 재정건전성 강화</td>
+        <td><span style="color:var(--strength);font-weight:700">최우선</span></td>
+      </tr>
+      <tr>
+        <td>전공자율선택제</td>
+        <td>무전공 학부 운영 중 — 선제 대응</td>
+        <td>운영 확대 및 성과 홍보, 교육부 정책 연계</td>
+        <td><span style="color:var(--orange)">높음</span></td>
+      </tr>
+      <tr>
+        <td>글로컬대학 미선정</td>
+        <td>수도권 — 불리</td>
+        <td>자체 특성화 브랜딩 강화, 대안 재원 발굴</td>
+        <td><span style="color:var(--gray)">중간</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="analysis-box">
+    <h4>🎯 핵심 전략 방향</h4>
+    <p><strong>단기(1년):</strong> 대학혁신지원사업 2년 차 성과 극대화 — 취업률 73% 이상 유지, 충원율 100% 달성, 전임교원 강의비율 50% 이상으로 개선.</p>
+    <p><strong>중기(3년):</strong> 교원확보율 70% 달성(매년 6~8명 증원), 기숙사 수용률 20% 목표, RISE 지역 사업 참여 확대.</p>
+    <p><strong>장기(5년+):</strong> REACH 전략 18대 과제 완성, 취업률 75% 이상 지속, 특성화 분야(신학·음악·사회복지·AI) 전국 최상위권 브랜드화.</p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<div class="page-break-hint">— 18 / 20 —</div>
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  섹션 6: 종합 결론 + 권고사항
+══════════════════════════════════════════════════════════════ -->
+
+<div id="conclusion" class="section">
+  <h2>VI. 종합 결론 및 권고사항</h2>
+
+  <h3>종합 결론</h3>
+  <div class="analysis-box">
+    <h4>📋 전략적 포지셔닝 요약</h4>
+    <p>한세대학교는 <strong>"소규모 정예 특성화 사립대"</strong>로서, 교육 성과(취업·경쟁·장학금·교육비 투자) 면에서 경기 지역 동규모 사립대 중 가장 강한 경쟁력을 보유하고 있습니다. 특히 취업률 71%(최신 73.5%)는 학령인구 감소와 등록금 동결이라는 이중 압박 속에서 선택의 기준이 되는 핵심 강점입니다.</p>
+    <p>다만 교원 인프라(확보율·강의비율)와 시설(기숙사) 측면에서는 비교군 평균에 미치지 못하는 구조적 취약점이 있으며, 이는 교육부 성과 지표 및 2040 구조개선 압력에서 잠재적 위험 요인입니다. REACH 혁신전략을 통해 방향성은 제대로 잡혀 있으므로, 자원 집중과 실행력 강화가 핵심 과제입니다.</p>
+  </div>
+
+  <h3>우선순위별 권고사항</h3>
+  <ul class="rec-list">
+    <li class="rec-item">
+      <div class="rec-num">1</div>
+      <div class="rec-content">
+        <strong>전임교원 강의비율 60% 목표 — 즉시 착수</strong>
+        <p>현재 48.3%(최저)에서 3년 내 60% 달성을 위해 매년 5~7명의 전임교원을 채용합니다. 시간강사·겸임 전환 가능 인력을 우선 심사하고, 신규 채용은 취업 연계 분야(AI·SW·보건·경영) 중심으로 설계합니다.</p>
+      </div>
+    </li>
+    <li class="rec-item">
+      <div class="rec-num">2</div>
+      <div class="rec-content">
+        <strong>충원율 100% 달성 전략 수립</strong>
+        <p>0.2%p 부족으로 비교군 최하위를 기록 중인 충원율을 100% 이상으로 끌어올려 교육부 재정진단 위험 요인을 제거합니다. 지역 고교 연계 강화, 미충원 모집 단위 분석, 군 입대 전형 확대를 검토합니다.</p>
+      </div>
+    </li>
+    <li class="rec-item">
+      <div class="rec-num">3</div>
+      <div class="rec-content">
+        <strong>대학혁신지원사업 성과 극대화 (2026년 2년 차)</strong>
+        <p>취업률(71%) 유지·강화와 REACH 혁신과제 이행률을 집중 관리합니다. 2026년 성과 평가에서 D등급 방지를 위한 지표별 모니터링 체계(분기별 KPI 리뷰)를 운영합니다.</p>
+      </div>
+    </li>
+    <li class="rec-item">
+      <div class="rec-num">4</div>
+      <div class="rec-content">
+        <strong>기숙사 수용률 20% 목표 (중기)</strong>
+        <p>현재 12.2%에서 5년 내 20% 달성을 위한 기숙사 신축 또는 협약형 임대기숙사 도입을 검토합니다. 군포시 청년 임대주택 협력도 대안으로 포함합니다.</p>
+      </div>
+    </li>
+    <li class="rec-item">
+      <div class="rec-num">5</div>
+      <div class="rec-content">
+        <strong>RISE 경기 지역 사업 참여 확대</strong>
+        <p>2025년 RISE 전국 시행을 계기로 경기도 지역혁신 컨소시엄에 적극 참여합니다. 한세대의 취업 특성화 역량(신학·음악·사회복지)을 지역 사회 서비스업과 연계하는 프로그램을 기획합니다.</p>
+      </div>
+    </li>
+    <li class="rec-item">
+      <div class="rec-num">6</div>
+      <div class="rec-content">
+        <strong>전략적 브랜딩 강화 — "취업 강점 대학" 포지셔닝</strong>
+        <p>취업률 1위·장학금 1위·교육비 투자 1위를 통합한 "학생 성공 보장" 브랜드를 구축합니다. 입시 홍보에서 이 세 가지 강점을 일관되게 커뮤니케이션해 경쟁률·충원율 동반 상승을 유도합니다.</p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="section-divider" style="margin:40px 0 20px;"></div>
+
+  <div style="text-align:center; color:var(--gray); font-size:12px; padding:20px 0;">
+    <strong>한세대학교 경쟁력 분석 보고서</strong><br />
+    2025년 대학알리미 공시 기준 · 교육부 정책 반영<br />
+    비교 대학: 안양대·성결대·협성대·평택대·한신대 (경기 지역 사립대)<br /><br />
+    <span style="color:var(--accent)">본 보고서는 대학 내부 전략 수립 목적으로 작성된 자료입니다.</span>
+  </div>
+</div>
+
+</div><!-- .page -->
+
+<script>
+// 스크롤 시 바 차트 애니메이션
+document.addEventListener('DOMContentLoaded', () => {
+  const bars = document.querySelectorAll('.bar-inner')
+  bars.forEach(bar => {
+    const targetWidth = bar.style.width
+    bar.style.width = '0'
+    bar.style.transition = 'width 1.2s cubic-bezier(0.16,1,0.3,1)'
+    setTimeout(() => { bar.style.width = targetWidth }, 300)
+  })
+})
+</script>
+</body>
+</html>

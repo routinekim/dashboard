@@ -142,6 +142,7 @@
 - **앱 수정·완료 시 https://github.com/routinekim/dashboard 에 자동 푸시** (`.env` 제외)
   
   - 항상 **`main`** 브랜치에 push — 로컬 브랜치명과 무관하게 아래 명령어로 고정:
+    
     ```
     git fetch origin && git rebase origin/main && git push origin HEAD:main
     ```
@@ -156,6 +157,7 @@
 - **증상**: `<Scatter shape={(props) => ...}>` 에서 `props.r` 이 `undefined` 또는 0으로 들어와 버블이 안 보임
 - **원인**: Recharts v2.x에서 ZAxis가 계산한 반지름이 커스텀 shape 함수에 안정적으로 전달되지 않음
 - **해결**: `r` prop 사용 금지 — `payload.sz` 와 사전계산한 `szExtent`로 직접 반지름 계산
+  
   ```js
   const [minSz, maxSz] = szExtent
   const t = (payload.sz - minSz) / (maxSz - minSz)

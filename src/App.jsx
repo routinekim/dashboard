@@ -1,102 +1,95 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { Routes, Route, NavLink, useNavigate } from 'react-router-dom'
 import Stage1 from './pages/Stage1.jsx'
 import Stage3 from './pages/Stage3.jsx'
 
-const NAV_STYLES = `
-  @keyframes navGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
-    50% { box-shadow: 0 0 40px rgba(139,92,246,0.6); }
-  }
-  @keyframes bgShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+const NAV_STYLE = `
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(6,14,31,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,212,255,0.2);
+  display: flex; align-items: center; padding: 0 24px;
+  height: 56px; gap: 8px;
+`
+
+const LOGO_STYLE = `
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  color: #00d4ff; letter-spacing: 2px;
+  margin-right: 24px; white-space: nowrap;
 `
 
 export default function App() {
-  const [activeStage, setActiveStage] = useState(1)
-
-  const navItems = [
-    { id: 1, label: '1단계', sub: '전국 대학 포지셔닝', icon: '🗺️' },
-    { id: 2, label: '2단계', sub: '분석 보고서', icon: '📋' },
-    { id: 3, label: '3단계', sub: '한세대 대시보드', icon: '🏫' },
-  ]
-
-  const handleStage2 = () => {
-    window.open('/report.html', '_blank')
-  }
-
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a1a 0%, #0d0a2e 50%, #0a0a1a 100%)' }}>
-      <style>{NAV_STYLES}</style>
-
-      {/* Top Navigation */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 1000,
-        background: 'rgba(10,10,26,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(139,92,246,0.2)',
-        padding: '0 24px',
-      }}>
-        <div style={{
-          maxWidth: '1400px', margin: '0 auto',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          height: '64px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '36px', height: '36px',
-              background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-              borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '18px', fontWeight: '700', color: '#fff',
-            }}>H</div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', letterSpacing: '0.5px' }}>한세대학교</div>
-              <div style={{ fontSize: '10px', color: 'rgba(139,92,246,0.8)', letterSpacing: '1px' }}>경쟁력 분석 플랫폼</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => item.id === 2 ? handleStage2() : setActiveStage(item.id)}
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  background: activeStage === item.id && item.id !== 2
-                    ? 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(6,182,212,0.2))'
-                    : 'transparent',
-                  borderLeft: activeStage === item.id && item.id !== 2
-                    ? '2px solid #8b5cf6'
-                    : '2px solid transparent',
-                  color: activeStage === item.id && item.id !== 2 ? '#a78bfa' : 'rgba(255,255,255,0.6)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '16px' }}>{item.icon}</span>
-                <span style={{ fontSize: '11px', fontWeight: '700' }}>{item.label}</span>
-                <span style={{ fontSize: '9px', opacity: 0.7 }}>{item.sub}</span>
-              </button>
-            ))}
-          </div>
-
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>
-            2025년 대학알리미 기준
-          </div>
+    <>
+      <nav style={{ cssText: NAV_STYLE }}>
+        <style>{`
+          .nav-wrap {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(6,14,31,0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,212,255,0.2);
+            display: flex; align-items: center; padding: 0 24px;
+            height: 56px; gap: 8px;
+          }
+          .nav-logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; font-weight: 700;
+            color: #00d4ff; letter-spacing: 2px;
+            margin-right: 24px; white-space: nowrap;
+          }
+          .nav-tab {
+            padding: 6px 18px; border-radius: 6px;
+            font-size: 13px; font-weight: 500;
+            color: rgba(224,240,255,0.6);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+          }
+          .nav-tab:hover {
+            color: #00d4ff;
+            border-color: rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.05);
+          }
+          .nav-tab.active {
+            color: #00d4ff;
+            border-color: rgba(0,212,255,0.5);
+            background: rgba(0,212,255,0.1);
+          }
+          .nav-report-btn {
+            padding: 6px 18px; border-radius: 6px;
+            font-size: 13px; font-weight: 500;
+            color: rgba(224,240,255,0.6);
+            border: 1px solid transparent;
+            transition: all 0.2s; cursor: pointer;
+            white-space: nowrap; background: none;
+          }
+          .nav-report-btn:hover {
+            color: #00d4ff;
+            border-color: rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.05);
+          }
+        `}</style>
+        <div className="nav-wrap">
+          <span className="nav-logo">HSU·ANALYTICS</span>
+          <NavLink to="/" end className={({isActive}) => 'nav-tab' + (isActive ? ' active' : '')}>
+            📊 1단계 포지셔닝 맵
+          </NavLink>
+          <button className="nav-report-btn" onClick={() => window.open('/hansei_report.html', '_blank')}>
+            📄 2단계 분석 보고서
+          </button>
+          <NavLink to="/dashboard" className={({isActive}) => 'nav-tab' + (isActive ? ' active' : '')}>
+            ⚡ 3단계 한세대 대시보드
+          </NavLink>
         </div>
       </nav>
 
-      {/* Content */}
-      <main>
-        {activeStage === 1 && <Stage1 />}
-        {activeStage === 3 && <Stage3 />}
-      </main>
-    </div>
+      <div style={{ paddingTop: 56 }}>
+        <Routes>
+          <Route path="/" element={<Stage1 />} />
+          <Route path="/dashboard" element={<Stage3 />} />
+        </Routes>
+      </div>
+    </>
   )
 }

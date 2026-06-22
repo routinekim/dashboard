@@ -709,7 +709,7 @@ function AIChat() {
 
     try {
       const apiKey = typeof __GEMINI_KEY__ !== 'undefined' ? __GEMINI_KEY__ : ''
-      if (!apiKey) throw new Error('API 키가 설정되지 않았습니다. .env 파일의 GEMINI_API_KEY를 확인해주세요.')
+      if (!apiKey) throw new Error('API 키가 설정되지 않았습니다. Vercel → Settings → Environment Variables에 GEMINI_API_KEY를 등록하고 Redeploy하세요.')
 
       const genAI = new GoogleGenerativeAI(apiKey)
       const model = genAI.getGenerativeModel({

@@ -204,6 +204,7 @@ export default function Stage1() {
           outline: none; cursor: pointer;
         }
         .select-styled:hover { border-color: rgba(0,212,255,0.6); }
+        .select-styled option { background: #0a1628; color: #e0f0ff; }
         .legend-dot {
           width: 10px; height: 10px; border-radius: 50%;
           display: inline-block; margin-right: 5px;

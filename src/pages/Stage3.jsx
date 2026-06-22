@@ -724,7 +724,11 @@ function AIChat() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        text: `오류가 발생했습니다: ${err.message}\n\nAPI 키를 확인해주세요.`
+        text: err.message?.includes('503')
+          ? '구글 AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.'
+          : err.message?.includes('API 키가 설정되지 않았습니다')
+          ? err.message
+          : `오류가 발생했습니다: ${err.message}`
       }])
     } finally {
       setLoading(false)

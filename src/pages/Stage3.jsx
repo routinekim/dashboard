@@ -713,7 +713,7 @@ function AIChat() {
 
       const genAI = new GoogleGenerativeAI(apiKey)
       const model = genAI.getGenerativeModel({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash-lite',
         generationConfig: { maxOutputTokens: 3000 }
       })
 
